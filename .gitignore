@@ -1,0 +1,7 @@
+./utils/config.py
+./input_videos/
+./models/
+./detect/
+./output_videos
+./runs
+./tracker_stubs

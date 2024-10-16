@@ -43,11 +43,14 @@ class PlayerTracker:
     def draw_bboxes(self, video_frames, player_detections):
         output_video_frames = []
         for frame, player_dict in zip(video_frames, player_detections):
-            #Draw the bounding boxes
+            # Draw the bounding boxes
             for track_id, bbox in player_dict.items():
                 x1, y1, x2, y2 = bbox
-                cv2.putText(frame, f"Player ID: {track_id}", (int(bbox[0], int(bbox[1] - 10))), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0,0,255), 2)
-                cv2.rectangle(frame, (int(x1), int(y1), int(x2), int(y2)), (0,0,255), 2)
+                # Corrected putText formatting
+                cv2.putText(frame, f"Player ID: {track_id}", (int(x1), int(y1) - 10), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+                # Corrected rectangle argument formatting
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 2)
             output_video_frames.append(frame)
 
         return output_video_frames

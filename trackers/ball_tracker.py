@@ -1,11 +1,16 @@
 from ultralytics import YOLO
+from inference import get_model
 import cv2
 import pickle
 import pandas as pd
+import numpy as np
+import supervision as sv
+
 
 class BallTracker:
     def __init__(self, model_path):
-        self.model = YOLO(model_path)
+        self.model = get_model(model_id="ball-detection-vamqx/8", api_key='AhGS5Qpq2TRxwQEakFeH')
+        #self.model = YOLO(model_path)
 
     
     def interpolate_ball_positions(self, ball_positions):
@@ -42,15 +47,18 @@ class BallTracker:
         return ball_detections
     
     def detect_frame(self, frame):
-        results = self.model.predict(frame, conf=0.15)[0]
+        results = self.model.infer(frame, conf=0.25)[0]
+        detections = sv.Detections.from_inference(results)
 
         ball_dict = {}
-        for box in results.boxes:
-            result = box.xyxy.tolist()[0]
+        for box in detections.xyxy:
+            result = box.tolist()
+            print(result)
             ball_dict[1] = result
 
         
         return ball_dict
+
 
     def draw_bboxes(self, video_frames, ball_detections):
         output_video_frames = []

@@ -19,7 +19,7 @@ def main():
     player_tracker = PlayerTracker('./models/yolov8x.pt')
     print("Detecting Players")
     player_detections = player_tracker.detect_frames(video_frames,
-                                                     read_from_stub=True,
+                                                     read_from_stub = True,
                                                      stub_path='./tracker_stubs/player_detections.pk1')
 
     #Detect ball
@@ -28,17 +28,21 @@ def main():
     print("Detecting Ball")
     ball_detections = ball_tracker.detect_frames(video_frames,
                                                  read_from_stub = True,
-                                                 stub_path ='./tracker_stubs/ball_detections.pk1')
+                                                 stub_path ='./tracker_stubs/ball_detections_2.pk1')
+    print('Filling in gaps')
     ball_detections = ball_tracker.interpolate_ball_positions(ball_detections)
     
 
-    #NOT WORKING
     #Detect court keypoints
-    # court_model_path = './models/keypoints_model.pth'
-    # court_line_detector = CourtLineDetector(court_model_path)
+    print('Finding court')
+    court_model_path = './models/keypoints_model.pth'
+    court_line_detector = CourtLineDetector(court_model_path)
+    # court_keypoints = court_line_detector.predict(video_frames[0])
+    court_keypoints = [556, 629, 1405, 627, 334, 1073, 1630, 1072]
 
-    #NOT WORKING
-    #court_keypoints = court_line_detector.predict(video_frames[0])
+    #Filter out non-player detections
+    print('Filtering Players')
+    player_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
 
 
     #Draw Player & Ball Bounding Boxes
@@ -48,29 +52,19 @@ def main():
 
     #NOT WORKING
     #Draw Court Keypoints
-    #output_video_frames = court_line_detector.draw_keypoints_on_video(output_video_frames, court_keypoints)
+    output_video_frames = court_line_detector.draw_keypoints_on_video(video_frames, court_keypoints)
+
+    ##Draw frame number in video
+    for i, frame in enumerate(output_video_frames):
+        cv2.putText(frame, f"Frame: {i}", (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+
 
     #Save the video
     print('Saving Video')
-    save_video(output_video_frames, './output_videos/output_video2.avi')
+    save_video(output_video_frames, "output_videos/output_video.avi")
 
-def save_video(frames, output_path):
-    print('Starting Save')
-    # Get the frame size (assuming all frames are the same size)
-    height, width, layers = frames[0].shape
-    size = (width, height)
 
-    print('Creating Writer')
-    # Define the codec and create VideoWriter object
-    out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'XVID'), 20, size)
 
-    print('Writing Frames')
-    for frame in frames:
-        print(frame)
-        out.write(frame)
-
-    out.release()
-    print(f"Video saved to {output_path}")
 
 
 

@@ -1,1 +1,1 @@
-from .court_line_detector import CourtLineDetector
+from .court_detector import CourtDetector

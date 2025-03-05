@@ -134,6 +134,6 @@ def process_video(video_path):
 
 
 if __name__ == '__main__':
-    process_video("./input_videos/ColbyV2.mov")
+    process_video("./input_videos/Jonah Point.mov")
 
 

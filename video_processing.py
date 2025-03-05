@@ -6,7 +6,6 @@ overlay_heatmap
 )
 from trackers import PlayerTracker, BallTracker
 from court_line_detector import CourtDetector
-from mini_court import MiniCourt
 import uuid
 import numpy as np
 import time

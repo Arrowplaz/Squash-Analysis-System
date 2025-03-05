@@ -14,7 +14,7 @@ def select_points(event, x, y, flags, param):
 def get_user_selected_points(frame):
     global court_keypoints
     court_keypoints = []  # Clear previous points
-    cv2.namedWindow("Select Court Points")
+    cv2.namedWindow("Select Court Points", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty("Select Court Points", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     

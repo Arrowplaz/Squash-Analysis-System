@@ -37,13 +37,13 @@ def process_video(video_path):
     print("Creating Player Tracker")
     player_tracker = PlayerTracker('./models/yolov8x.pt')
     print("Detecting Players")
-    player_detections = player_tracker.detect_frames(video_frames, read_from_stub=True, stub_path=f'./tracker_stubs/{file_name}/_player.pk1')
+    player_detections = player_tracker.detect_frames(video_frames, read_from_stub=False, stub_path=f'./tracker_stubs/{file_name}/_player.pk1')
 
     # Initialize ball tracker
     print("Creating Ball Tracker")
     ball_tracker = BallTracker('./models/ball_best.pt')
     print("Detecting Ball")
-    ball_detections = ball_tracker.detect_frames(video_frames, read_from_stub=True, stub_path=f'./tracker_stubs/{file_name}/_ball.pk1')
+    ball_detections = ball_tracker.detect_frames(video_frames, read_from_stub=False, stub_path=f'./tracker_stubs/{file_name}/_ball.pk1')
     print('Filling in gaps')
     ball_detections = ball_tracker.interpolate_ball_positions(ball_detections)
 
@@ -134,6 +134,6 @@ def process_video(video_path):
 
 
 if __name__ == '__main__':
-    process_video("./input_videos/Veer Point.mov")
+    process_video("./input_videos/Colby.mov")
 
 

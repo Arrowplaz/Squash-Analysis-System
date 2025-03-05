@@ -1,12 +1,14 @@
 import cv2
 import os
 from utils import (read_video, save_video, get_user_selected_points,
-get_user_selected_roi, detect_score, analyze_scoreboard, preprocess_scores, create_court_heatmap
+get_user_selected_roi, detect_score, analyze_scoreboard, preprocess_scores, create_heatmap, map_detections,
+overlay_heatmap
 )
 from trackers import PlayerTracker, BallTracker
 from court_line_detector import CourtDetector
 from mini_court import MiniCourt
 import uuid
+import numpy as np
 court_keypoints = []
 
 
@@ -27,9 +29,10 @@ def process_video(video_path):
 
     #Detect the court
     print("Detecting Court Keypoints")
-    court_detector = CourtDetector()
-    court_keypoints = court_detector.detect_court(first_frame, read_from_stub = False, stub_path= f'./tracker_stubs/{file_name}/_court.pk1')
-    return 
+    # court_detector = CourtDetector()
+    # court_keypoints = court_detector.detect_court(first_frame, read_from_stub = False, stub_path= f'./tracker_stubs/{file_name}/_court.pk1', show=True)
+    court_keypoints = get_user_selected_points(first_frame)
+    print(court_keypoints)
     # Initialize player tracker
     print("Creating Player Tracker")
     player_tracker = PlayerTracker('./models/yolov8x.pt')
@@ -47,17 +50,37 @@ def process_video(video_path):
     # Filter out non-player detections based on court keypoints
     print('Filtering Players')
     player_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
-    print(player_detections)
-
-    create_court_heatmap(player_detections, court_keypoints)
-    
-
-    
 
 
+    court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
+    warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
+    mapped_detections = map_detections(player_detections, H)
+    heatmap = overlay_heatmap(overlay, mapped_detections)
+    heatmap_path = f"./heatmaps/{file_name}"
+    cv2.imwrite(heatmap_path, heatmap)
+    # # Prepare a padded warped image so that it aligns with the overlay's dimensions:
+    # padding = 0
+    # # The overlay canvas is larger by the padding amount
+    # padded_warped = np.zeros_like(overlay)
+    # # Resize the warped image to exactly match the court area (without padding)
+    # overlay_height = overlay.shape[0] - padding
+    # overlay_width = overlay.shape[1] - padding
+    # resized_warped = cv2.resize(warped_image, (overlay_width, overlay_height))
+    # # Place the resized warped image into the padded canvas at the correct offset
+    # padded_warped[padding:, padding:] = resized_warped
 
-    
+    # # Blend the padded warped image and the overlay into a composite image
+    # composite = cv2.addWeighted(padded_warped, 0.7, overlay, 0.3, 0)
 
+    # for (x, y) in mapped_detections:
+    #     x, y = int(x), int(y)  # Ensure coordinates are integers
+    #     cv2.circle(composite, (x, y), radius=5, color=(0, 255, 0), thickness=-1)  # Green circles for players
+
+
+    # Display the composite image in a single window
+    # cv2.imshow("Warped Image with Overlay", composite)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     # # Analyze scoreboard
     # print("Analyzing Scoreboard")
     # scores = analyze_scoreboard(video_frames)
@@ -85,13 +108,7 @@ def process_video(video_path):
     output_video_frames = player_tracker.draw_bboxes(video_frames, player_detections)
     output_video_frames = ball_tracker.draw_bboxes(output_video_frames, ball_detections)
 
-    # hm = MiniCourt(video_frames[0])
-    # player_mini_court_detections= hm.convert_bounding_boxes_to_mini_court_coordinates(player_detections, court_keypoints)
-    # #Draw Minicourt
-    # output_video_frames = hm.draw_mini_court(output_video_frames)
-    # output_video_frames = hm.draw_points_on_mini_court(output_video_frames, player_mini_court_detections)
-    
-    #Convert Positions to mini-court positions
+   
     
 
 

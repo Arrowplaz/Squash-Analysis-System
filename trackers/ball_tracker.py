@@ -5,12 +5,12 @@ import pickle
 import pandas as pd
 import numpy as np
 import supervision as sv
+from utils import ultralytics_key
 
 
 class BallTracker:
     def __init__(self, model_path):
-        self.model = get_model(model_id="ball-detection-vamqx/8", api_key='AhGS5Qpq2TRxwQEakFeH')
-        #self.model = YOLO(model_path)
+        self.model = get_model(model_id="ball-detection-vamqx/8", api_key=ultralytics_key)
 
     
     def interpolate_ball_positions(self, ball_positions):
@@ -36,8 +36,10 @@ class BallTracker:
             
             return ball_detections
 
-
+        counter = 1
         for frame in frames:
+            print(f"BALL PROGRESS: {counter}/{len(frames)}")
+            counter += 1
             ball_detections.append(self.detect_frame(frame))
 
         if stub_path is not None:
@@ -47,7 +49,7 @@ class BallTracker:
         return ball_detections
     
     def detect_frame(self, frame):
-        results = self.model.infer(frame, conf=0.25)[0]
+        results = self.model.predict(frame, conf=0.25)[0]
         detections = sv.Detections.from_inference(results)
 
         ball_dict = {}
@@ -57,7 +59,6 @@ class BallTracker:
             ball_dict[1] = result
 
         
-        return ball_dict
 
 
     def draw_bboxes(self, video_frames, ball_detections):

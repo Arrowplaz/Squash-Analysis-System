@@ -113,7 +113,7 @@ def process_video(video_path):
 
 
 
-    final_video_path = os.path.join(save_path, "bad_ball.avi")
+    final_video_path = os.path.join(save_path, "output.avi")
     print(f"Saving final video to: {final_video_path}")  # Debugging output
     save_video(output_video_frames, final_video_path)
 

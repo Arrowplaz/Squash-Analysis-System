@@ -10,6 +10,8 @@ def read_video(video_path):
             break
         frames.append(frame)
     cap.release()
+    if len(frames) == 0:
+        print('Failed to read video')
     return frames
 
 def save_video(output_video_frames, output_video_path):

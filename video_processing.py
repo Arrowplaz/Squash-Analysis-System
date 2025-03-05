@@ -40,12 +40,12 @@ def process_video(video_path):
     player_detections = player_tracker.detect_frames(video_frames, read_from_stub=False, stub_path=f'./tracker_stubs/{file_name}/_player.pk1')
 
     # Initialize ball tracker
-    print("Creating Ball Tracker")
-    ball_tracker = BallTracker('./models/ball_best.pt')
-    print("Detecting Ball")
-    ball_detections = ball_tracker.detect_frames(video_frames, read_from_stub=False, stub_path=f'./tracker_stubs/{file_name}/_ball.pk1')
-    print('Filling in gaps')
-    ball_detections = ball_tracker.interpolate_ball_positions(ball_detections)
+    # print("Creating Ball Tracker")
+    # ball_tracker = BallTracker('./models/ball_best.pt')
+    # print("Detecting Ball")
+    # ball_detections = ball_tracker.detect_frames(video_frames, read_from_stub=False, stub_path=f'./tracker_stubs/{file_name}/_ball.pk1')
+    # print('Filling in gaps')
+    # ball_detections = ball_tracker.interpolate_ball_positions(ball_detections)
 
     # Filter out non-player detections based on court keypoints
     print('Filtering Players')
@@ -116,7 +116,7 @@ def process_video(video_path):
     #     save_video(point_video_frames, f"{save_path}/point_{idx + 1}.avi")
     
     output_video_frames = player_tracker.draw_bboxes(video_frames, player_detections)
-    output_video_frames = ball_tracker.draw_bboxes(output_video_frames, ball_detections)
+    # output_video_frames = ball_tracker.draw_bboxes(output_video_frames, ball_detections)
 
    
     

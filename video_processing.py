@@ -9,6 +9,7 @@ from court_line_detector import CourtDetector
 from mini_court import MiniCourt
 import uuid
 import numpy as np
+import time
 court_keypoints = []
 
 
@@ -56,8 +57,18 @@ def process_video(video_path):
     warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
     mapped_detections = map_detections(player_detections, H)
     heatmap = overlay_heatmap(overlay, mapped_detections)
-    heatmap_path = f"./heatmaps/{file_name}"
+    # Ensure directory exists
+    save_dir = f"./heatmaps/{file_name}"
+    os.makedirs(save_dir, exist_ok=True)
+
+    
+
+
+    # Use timestamp to avoid overwriting files
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
     cv2.imwrite(heatmap_path, heatmap)
+
     # # Prepare a padded warped image so that it aligns with the overlay's dimensions:
     # padding = 0
     # # The overlay canvas is larger by the padding amount

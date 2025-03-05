@@ -15,6 +15,8 @@ def get_user_selected_points(frame):
     global court_keypoints
     court_keypoints = []  # Clear previous points
     cv2.namedWindow("Select Court Points")
+    cv2.setWindowProperty("Select Court Points", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
     
     # Pass frame as part of the param dictionary
     cv2.setMouseCallback("Select Court Points", select_points, param={'frame': frame})

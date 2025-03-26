@@ -28,6 +28,8 @@ class PlayerTracker:
                     remaining_ids.remove(track_id)
                 
             for track_id, bbox in chosen_players.items():
+                if len(remaining_ids) == 0:
+                    break
                 if track_id not in main_ids:
                     filtered_player_dict[(remaining_ids[0])] = bbox
                     remaining_ids.remove((remaining_ids[0]))

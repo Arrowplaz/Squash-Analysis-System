@@ -44,7 +44,7 @@ class PlayerTracker:
         
         # If there are no detections, return an empty list
         if not player_dict:
-            return []
+            return {}
 
         # Calculate the center of the court
         court_center_x = (court_keypoints[0] + court_keypoints[2]) / 2

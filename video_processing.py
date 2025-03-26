@@ -90,4 +90,4 @@ def process_video(video_path):
 
 
 if __name__ == '__main__':
-    process_video("/Users/anagireddygari/Desktop/Honors Project/Honors-Project-Player-Tracking-in-Squash-for-Analytics/input_videos_final/test.mp4")
+    process_video("/input_videos/test.mp4")

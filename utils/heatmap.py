@@ -150,8 +150,8 @@ def overlay_heatmap(composite, mapped_detections):
     heatmap_overlay = cv2.addWeighted(heatmap_color, alpha, composite, 1 - alpha, 0)
 
     # # Display the final result
-    # cv2.imshow("Court with Heatmap", heatmap_overlay)
-    # cv2.waitKey(0)
+    cv2.imshow("Court with Heatmap", heatmap_overlay)
+    cv2.waitKey(0)
 
     return heatmap
 

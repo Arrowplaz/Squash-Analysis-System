@@ -1,18 +1,14 @@
 import cv2
 import os
-from utils import (read_video, save_video, get_user_selected_points,
-get_user_selected_roi, detect_score, analyze_scoreboard, preprocess_scores, create_heatmap, map_detections,
-overlay_heatmap
-)
-from trackers import PlayerTracker, BallTracker
-from court_line_detector import CourtDetector
-import uuid
-import numpy as np
-import time
 import pickle
-court_keypoints = []
-
-
+import time
+import gc
+from utils import (
+    get_user_selected_points, create_heatmap, map_detections,
+    overlay_heatmap, save_video
+)
+from trackers import PlayerTracker
+import numpy as np
 
 def process_video(video_path):
     print('Opening Video')
@@ -22,72 +18,86 @@ def process_video(video_path):
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
-        print("Error: Couldnt Open Video")
+        print("Error: Could not open video.")
         return
 
     ret, first_frame = cap.read()
     if not ret:
-        print('Error: Could not read first frame')
+        print('Error: Could not read first frame.')
         return
-    
+
     print('Detecting Court Keypoints')
     court_keypoints = get_user_selected_points(first_frame)
 
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
 
+    # Set up video writer
+    save_path = f"./output_videos/{file_name}"
+    os.makedirs(save_path, exist_ok=True)
+    final_video_path = os.path.join(save_path, "output.avi")
+
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
+
+    detections_path = f"./detections/{file_name}"
+    os.makedirs(detections_path, exist_ok=True)
+
     player_detections = []
-    output_video_frames = []
     frame_idx = 0
+    chunk_size = 1000  # Save every 1000 frames
 
-
-    'Stubs'
-    player_stub=f'./tracker_stubs/{file_name}/_player.pk1'
-    player_exists = False
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
+
         print(f'Processing frame: {frame_idx}')
 
-        player_detection = player_tracker.detect_frame(frame)
-        player_detections.append(player_detection)
-        player_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
-        output_frame = player_tracker.draw_bbox(frame, player_detections[-1])
-        output_video_frames.append(output_frame)
+        # Process and track players
+        detections = player_tracker.detect_frame(frame)
+        player_detections.append(detections)
+        filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
+
+        output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
+        out.write(output_frame)  # Write frame directly to video
+
+        # Periodically save detections to disk and free memory
+        if frame_idx % chunk_size == 0 and frame_idx > 0:
+            chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
+            with open(chunk_file, 'wb') as f:
+                pickle.dump(player_detections, f)
+            player_detections.clear()  # Free memory
+            gc.collect()
+
         frame_idx += 1
+
     cap.release()
+    out.release()
+    print(f"Final video saved to: {final_video_path}")
 
-    # if player_stub and not player_exists:
-    #     stub_dir = os.path.dirname(player_stub)
-    #     if stub_dir and not os.path.exists(stub_dir):
-    #         os.makedirs(stub_dir, exist_ok=True)
-    #     with open(player_stub, 'wb') as f:
-    #         pickle.dump(player_detections, f)
+    # Load all detections for heatmap
+    print('Loading saved detections...')
+    all_detections = []
+    for file in sorted(os.listdir(detections_path)):
+        if file.endswith('.pkl'):
+            with open(os.path.join(detections_path, file), 'rb') as f:
+                all_detections.extend(pickle.load(f))
 
-    print('Heatmap Generating....')
+    print('Generating Heatmap...')
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
     warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
-    mapped_detections = map_detections(player_detections, H)
+    mapped_detections = map_detections(all_detections, H)
     heatmap = overlay_heatmap(overlay, mapped_detections)
-    
+
     save_dir = f"./heatmaps/{file_name}"
     os.makedirs(save_dir, exist_ok=True)
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
     cv2.imwrite(heatmap_path, heatmap)
-    
-    save_path = f"./output_videos/{file_name}"
-    os.makedirs(save_path, exist_ok=True)
-    final_video_path = os.path.join(save_path, "output.avi")
-    print(f"Saving final video to: {final_video_path}")
-    save_video(output_video_frames, final_video_path)
-
-
-
-
-    
-
 
 if __name__ == '__main__':
     process_video("./input_videos/test.mp4")

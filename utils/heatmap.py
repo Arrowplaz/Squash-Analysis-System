@@ -149,7 +149,7 @@ def overlay_heatmap(composite, mapped_detections):
     alpha = 0.6  # Transparency factor
     heatmap_overlay = cv2.addWeighted(heatmap_color, alpha, composite, 1 - alpha, 0)
 
-    # Display the final result
+    # # Display the final result
     # cv2.imshow("Court with Heatmap", heatmap_overlay)
     # cv2.waitKey(0)
 

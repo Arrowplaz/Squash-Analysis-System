@@ -13,39 +13,29 @@ class PlayerTracker:
 
     
     def choose_and_filter_players(self, player_detections, court_keypoints):
-        filtered_player_detections = []
-        main_ids = []
-
-        for player_dict in player_detections:
-            
-            # Choose the two players closest to the court based on their bounding boxes
-            chosen_players = self.choose_players(court_keypoints, player_dict)
-            if len(main_ids) == 0:
-                for track_id, _ in chosen_players:
-                    main_ids.append(track_id)
-            
+        if len(player_detections) == 1:
+            chosen_players = self.choose_players(court_keypoints, player_detections[0])
+            return [chosen_players]
+        else:
+            main_ids = list(player_detections[-2].keys())
+            chosen_players = self.choose_players(court_keypoints, player_detections[-1])
 
             filtered_player_dict = {}
             remaining_ids = main_ids.copy()
-            
-            #Match same IDs 
-            for track_id, bbox in chosen_players:
+            for track_id, bbox in chosen_players.items():
                 if track_id in main_ids:
                     filtered_player_dict[track_id] = bbox
                     remaining_ids.remove(track_id)
-            
-            
-            #Second iteration for new IDS
-            for track_id, bbox in chosen_players:
-                if track_id not in main_ids:
-                    filtered_player_dict[remaining_ids[0]] = bbox
-                    remaining_ids.remove(remaining_ids[0])
                 
-            # Filter the player detections for the two chosen players
-            filtered_player_detections.append(filtered_player_dict)
-        
-        print(main_ids)
-        return filtered_player_detections
+            for track_id, bbox in chosen_players.items():
+                if track_id not in main_ids:
+                    filtered_player_dict[(remaining_ids[0])] = bbox
+                    remaining_ids.remove((remaining_ids[0]))
+            
+            player_detections[-1] = filtered_player_dict
+            return player_detections
+
+       
 
     def choose_players(self, court_keypoints, player_dict):
         distances = []
@@ -71,11 +61,11 @@ class PlayerTracker:
         # Sort by minimum distance to the court keypoints
         distances.sort(key=lambda x: x[2])
 
-        chosen_players = []
+        chosen_players = {}
 
         #Grab the track_id and b
         for i in range(min(2, len(distances))):
-            chosen_players.append((distances[i][0], distances[i][1]))
+            chosen_players[distances[i][0]] = distances[i][1]
 
 
         return chosen_players
@@ -121,6 +111,17 @@ class PlayerTracker:
                 player_dict[track_id] = result
         
         return player_dict
+
+    def draw_bbox(self, frame, player_detection):
+        for track_id, bbox in player_detection.items():
+            x1, y1, x2, y2 = bbox
+            cv2.putText(frame, f"Player ID: {track_id}", (int(x1), int(y1) - 10), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+            if track_id == 1:
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 2)
+            else:
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 255), 2)
+        return frame
 
     def draw_bboxes(self, video_frames, player_detections):
         output_video_frames = []

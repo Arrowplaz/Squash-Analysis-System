@@ -15,6 +15,35 @@ def process_video(video_path):
     base_name = os.path.basename(video_path)
     file_name, _ = os.path.splitext(base_name)
 
+    # Check if the video has already been processed by looking for the detection files or heatmap
+    detections_path = f"./detections/{file_name}"
+    heatmap_save_dir = f"./heatmaps/{file_name}"
+
+    if os.path.exists(heatmap_save_dir):
+        print(f"Heatmap for {file_name} already exists. Skipping video processing.")
+        # Skip the video processing and go directly to heatmap generation
+        all_detections = []
+        for file in sorted(os.listdir(detections_path)):
+            if file.endswith('.pkl'):
+                with open(os.path.join(detections_path, file), 'rb') as f:
+                    all_detections.extend(pickle.load(f))
+
+        print('Generating Heatmap...')
+        first_frame = cv2.imread(f'./input_videos/{file_name}.jpg')  # Assuming the first frame was saved as a .jpg or use other methods
+        court_keypoints = get_user_selected_points(first_frame)  # If needed, this can be pre-saved as well
+        court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
+        warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
+        mapped_detections = map_detections(all_detections, H)
+        heatmap = overlay_heatmap(overlay, mapped_detections)
+
+        save_dir = f"./heatmaps/{file_name}"
+        os.makedirs(save_dir, exist_ok=True)
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
+        cv2.imwrite(heatmap_path, heatmap)
+        print(f"Heatmap saved to: {heatmap_path}")
+        return
+
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
@@ -43,7 +72,6 @@ def process_video(video_path):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
 
-    detections_path = f"./detections/{file_name}"
     os.makedirs(detections_path, exist_ok=True)
 
     player_detections = []
@@ -98,6 +126,7 @@ def process_video(video_path):
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
     cv2.imwrite(heatmap_path, heatmap)
+    print(f"Heatmap saved to: {heatmap_path}")
 
 if __name__ == '__main__':
     process_video("./input_videos/test.mp4")

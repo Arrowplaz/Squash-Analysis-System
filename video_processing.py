@@ -3,6 +3,7 @@ import os
 import pickle
 import time
 import gc
+import copy
 from utils import (
     get_user_selected_points, create_heatmap, map_detections,
     overlay_heatmap, save_video
@@ -17,9 +18,11 @@ def process_video(video_path):
 
     # Check if the video has already been processed by looking for the detection files or heatmap
     detections_path = f"./detections/{file_name}"
+    print(detections_path)
+    print(video_path)
     heatmap_save_dir = f"./heatmaps/{file_name}"
 
-    if os.path.exists(heatmap_save_dir):
+    if os.path.exists(detections_path):
         print(f"Heatmap for {file_name} already exists. Skipping video processing.")
         # Skip the video processing and go directly to heatmap generation
         all_detections = []
@@ -93,13 +96,19 @@ def process_video(video_path):
         output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
         out.write(output_frame)  # Write frame directly to video
 
-        # Periodically save detections to disk and free memory
-        if frame_idx % chunk_size == 0 and frame_idx > 0:
-            chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
-            with open(chunk_file, 'wb') as f:
-                pickle.dump(player_detections, f)
-            player_detections.clear()  # Free memory
-            gc.collect()
+       
+
+    # Periodically save detections to disk and free memory
+    if frame_idx % chunk_size == 0 and frame_idx > 0:
+        chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
+        with open(chunk_file, 'wb') as f:
+            pickle.dump(player_detections, f)
+        
+        tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
+        player_detections.clear()  # Free memory
+        gc.collect()
+        player_detections.append(tmp)  # Restore the last frame
+
 
         frame_idx += 1
 

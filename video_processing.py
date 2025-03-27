@@ -34,6 +34,7 @@ def process_video(video_path):
 
     print('Detecting Court Keypoints')
     court_keypoints = get_user_selected_points(first_frame)
+    court_keypoints = [709, 536, 1268, 536, 575, 871, 1405, 874]
 
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
@@ -119,4 +120,4 @@ def process_video(video_path):
     print(f"Heatmap saved to: {heatmap_path}")
 
 if __name__ == '__main__':
-    process_video("./input_videos/test.mp4")
+    process_video("./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game3_College.mp4")

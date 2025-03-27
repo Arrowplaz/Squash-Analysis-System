@@ -98,19 +98,19 @@ def process_video(video_path):
 
        
 
-    # Periodically save detections to disk and free memory
-    if frame_idx % chunk_size == 0 and frame_idx > 0:
-        chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
-        with open(chunk_file, 'wb') as f:
-            pickle.dump(player_detections, f)
-        
-        tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
-        player_detections.clear()  # Free memory
-        gc.collect()
-        player_detections.append(tmp)  # Restore the last frame
+        # Periodically save detections to disk and free memory
+        if frame_idx % chunk_size == 0 and frame_idx > 0:
+            chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
+            with open(chunk_file, 'wb') as f:
+                pickle.dump(player_detections, f)
+            
+            tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
+            player_detections.clear()  # Free memory
+            gc.collect()
+            player_detections.append(tmp)  # Restore the last frame
 
 
-        frame_idx += 1
+    frame_idx += 1
 
     cap.release()
     out.release()

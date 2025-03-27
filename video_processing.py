@@ -55,7 +55,7 @@ def process_video(video_path):
     player_detections = []
     frame_idx = 0
     chunk_size = 1000  # Save every 1000 frames
-    if not os.path.exists(detections_path):
+    if os.listdir(detections_path) == []:
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:

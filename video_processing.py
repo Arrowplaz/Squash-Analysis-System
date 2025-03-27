@@ -110,7 +110,7 @@ def process_video(video_path):
             player_detections.append(tmp)  # Restore the last frame
 
 
-    frame_idx += 1
+        frame_idx += 1
 
     cap.release()
     out.release()

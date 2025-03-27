@@ -21,32 +21,6 @@ def process_video(video_path):
     print(detections_path)
     print(video_path)
     heatmap_save_dir = f"./heatmaps/{file_name}"
-
-    if os.path.exists(detections_path):
-        print(f"Heatmap for {file_name} already exists. Skipping video processing.")
-        # Skip the video processing and go directly to heatmap generation
-        all_detections = []
-        for file in sorted(os.listdir(detections_path)):
-            if file.endswith('.pkl'):
-                with open(os.path.join(detections_path, file), 'rb') as f:
-                    all_detections.extend(pickle.load(f))
-
-        print('Generating Heatmap...')
-        first_frame = cv2.imread(f'./input_videos/{file_name}.jpg')  # Assuming the first frame was saved as a .jpg or use other methods
-        court_keypoints = get_user_selected_points(first_frame)  # If needed, this can be pre-saved as well
-        court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
-        warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
-        mapped_detections = map_detections(all_detections, H)
-        heatmap = overlay_heatmap(overlay, mapped_detections)
-
-        save_dir = f"./heatmaps/{file_name}"
-        os.makedirs(save_dir, exist_ok=True)
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
-        cv2.imwrite(heatmap_path, heatmap)
-        print(f"Heatmap saved to: {heatmap_path}")
-        return
-
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
@@ -80,37 +54,44 @@ def process_video(video_path):
     player_detections = []
     frame_idx = 0
     chunk_size = 1000  # Save every 1000 frames
+    if not os.path.exists(detections_path):
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+            print(f'Processing frame: {frame_idx}')
 
-        print(f'Processing frame: {frame_idx}')
+            # Process and track players
+            detections = player_tracker.detect_frame(frame)
+            player_detections.append(detections)
+            filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
 
-        # Process and track players
-        detections = player_tracker.detect_frame(frame)
-        player_detections.append(detections)
-        filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
+            output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
+            out.write(output_frame)  # Write frame directly to video
 
-        output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
-        out.write(output_frame)  # Write frame directly to video
+        
 
-       
-
-        # Periodically save detections to disk and free memory
-        if frame_idx % chunk_size == 0 and frame_idx > 0:
-            chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
-            with open(chunk_file, 'wb') as f:
-                pickle.dump(player_detections, f)
-            
-            tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
-            player_detections.clear()  # Free memory
-            gc.collect()
-            player_detections.append(tmp)  # Restore the last frame
+            # Periodically save detections to disk and free memory
+            if frame_idx % chunk_size == 0 and frame_idx > 0:
+                chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
+                with open(chunk_file, 'wb') as f:
+                    pickle.dump(player_detections, f)
+                
+                tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
+                player_detections.clear()  # Free memory
+                gc.collect()
+                player_detections.append(tmp)  # Restore the last frame
 
 
-        frame_idx += 1
+            frame_idx += 1
+    else:
+        print(f"Heatmap for {file_name} already exists. Skipping video processing.")
+        for file in sorted(os.listdir(detections_path)):
+            if file.endswith('.pkl'):
+                with open(os.path.join(detections_path, file), 'rb') as f:
+                    player_detections.extend(pickle.load(f))
+
 
     cap.release()
     out.release()

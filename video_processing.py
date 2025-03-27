@@ -120,4 +120,17 @@ def process_video(video_path):
     print(f"Heatmap saved to: {heatmap_path}")
 
 if __name__ == '__main__':
+    process_video("./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game1_College.mp4")
+    process_video("./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game2_College.mp4")
+    process_video("./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game3_College.mp4")
+    process_video("./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game4_College.mp4")
+    process_video("./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game5_College.mp4")
+    process_video("./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game1_College.mp4")
+    process_video("./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game2_College.mp4")
     process_video("./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game3_College.mp4")
+    process_video("./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game4_College.mp4")
+    process_video("./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game1_College.mp4")
+    process_video("./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game2_College.mp4")
+    process_video("./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game3_College.mp4")
+    process_video("./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game4_College.mp4")
+    

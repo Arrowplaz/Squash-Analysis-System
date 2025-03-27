@@ -33,7 +33,7 @@ def process_video(video_path):
         return
 
     print('Detecting Court Keypoints')
-    court_keypoints = get_user_selected_points(first_frame)
+    #court_keypoints = get_user_selected_points(first_frame)
     court_keypoints = [709, 536, 1268, 536, 575, 871, 1405, 874]
 
     print('Creating Trackers')

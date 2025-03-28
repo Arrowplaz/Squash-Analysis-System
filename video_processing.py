@@ -6,7 +6,7 @@ import gc
 import copy
 from utils import (
     get_user_selected_points, create_heatmap, map_detections,
-    overlay_heatmap, save_video
+    overlay_heatmap, save_video, parse_file_name, insert_match
 )
 from trackers import PlayerTracker
 import numpy as np
@@ -57,7 +57,7 @@ def process_video(video_path):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            if frame_idx == 10000:
+            if frame_idx == 2000:
                 break
             ret, frame = cap.read()
             if not ret:
@@ -68,8 +68,8 @@ def process_video(video_path):
             # Process and track players
             detections = player_tracker.detect_frame(frame)
             player_detections.append(detections)
-            filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
-
+            #filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
+            filtered_detections = player_detections
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 
@@ -120,18 +120,18 @@ def process_video(video_path):
 
     print("Uploaded to MongoDB")
 
-    print('Generating Heatmap...')
-    court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
-    warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
-    mapped_detections = map_detections(all_detections, H)
-    heatmap = overlay_heatmap(overlay, mapped_detections)
+    # print('Generating Heatmap...')
+    # court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
+    # warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
+    # mapped_detections = map_detections(all_detections, H)
+    # heatmap = overlay_heatmap(overlay, mapped_detections)
 
-    save_dir = f"./heatmaps/{file_name}"
-    os.makedirs(save_dir, exist_ok=True)
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-    heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
-    cv2.imwrite(heatmap_path, heatmap)
-    print(f"Heatmap saved to: {heatmap_path}")
+    # save_dir = f"./heatmaps/{file_name}"
+    # os.makedirs(save_dir, exist_ok=True)
+    # timestamp = time.strftime("%Y%m%d-%H%M%S")
+    # heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
+    # cv2.imwrite(heatmap_path, heatmap)
+    # print(f"Heatmap saved to: {heatmap_path}")
 
    
 

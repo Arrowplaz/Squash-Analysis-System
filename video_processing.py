@@ -87,7 +87,7 @@ def process_video(video_path):
 
             frame_idx += 1
     else:
-        print(f"Heatmap for {file_name} already exists. Skipping video processing.")
+        print(f"Detections for {file_name} already exists. Skipping video processing.")
         for file in sorted(os.listdir(detections_path)):
             if file.endswith('.pkl'):
                 with open(os.path.join(detections_path, file), 'rb') as f:
@@ -119,12 +119,17 @@ def process_video(video_path):
     cv2.imwrite(heatmap_path, heatmap)
     print(f"Heatmap saved to: {heatmap_path}")
 
+    #Save to MongoDB
+    tmp = list(player_detections.values())
+    p1_detections, p2_detections = tmp[0], tmp[1]
+
+
 if __name__ == '__main__':
     process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game1_College.mp4")
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game2_College.mp4")
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game2_College.mp4")
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
     
     

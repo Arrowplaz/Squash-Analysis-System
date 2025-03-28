@@ -95,7 +95,7 @@ def process_video(video_path):
 
 
     cap.release()
-    #out.release()
+    out.release()
     print(f"Final video saved to: {final_video_path}")
 
     # Load all detections for heatmap

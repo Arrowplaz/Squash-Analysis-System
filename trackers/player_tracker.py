@@ -7,17 +7,20 @@ sys.path.append("../")
 from utils import get_center_of_bbox, measure_distance
 
 class PlayerTracker:
+    
     def __init__(self, model_path):
         self.model = YOLO(model_path)
         self.previous_player_dict = {}
+        self.main_ids = []
 
     
     def choose_and_filter_players(self, player_detections, court_keypoints):
-        if len(player_detections) == 1:
+        if len(self.main_ids) == 0:
             chosen_players = self.choose_players(court_keypoints, player_detections[0])
+            self.main_ids = list(chosen_players.keys())
             return [chosen_players]
         else:
-            main_ids = list(player_detections[-2].keys())
+            main_ids = self.main_ids
             chosen_players = self.choose_players(court_keypoints, player_detections[-1])
 
             filtered_player_dict = {}
@@ -48,7 +51,7 @@ class PlayerTracker:
 
         # Calculate the center of the court
         court_center_x = (court_keypoints[0] + court_keypoints[2]) / 2
-        court_center_y = (court_keypoints[1] + court_keypoints[3]) / 2
+        court_center_y = (court_keypoints[1] + court_keypoints[5]) / 2
         court_center = (court_center_x, court_center_y)
 
         # Go through all detections in the current frame

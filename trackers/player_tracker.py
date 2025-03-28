@@ -50,6 +50,40 @@ class PlayerTracker:
         player_detections[-1] = filtered_player_dict  # Update the latest frame
         return player_detections
 
+       
+
+    def choose_players(self, court_keypoints, player_dict):
+        distances = []
+        
+        # If there are no detections, return an empty list
+        if not player_dict:
+            return {}
+
+        # Calculate the center of the court
+        court_center_x = (court_keypoints[0] + court_keypoints[2]) / 2
+        court_center_y = (court_keypoints[1] + court_keypoints[5]) / 2
+        court_center = (court_center_x, court_center_y)
+
+        # Go through all detections in the current frame
+        for track_id, bbox in player_dict.items():
+            player_center = get_center_of_bbox(bbox)
+
+            # Calculate distance from the player's center to the court center
+            distance = measure_distance(player_center, court_center)
+
+            distances.append((track_id, bbox, distance))
+
+        # Sort by minimum distance to the court keypoints
+        distances.sort(key=lambda x: x[2])
+
+        chosen_players = {}
+
+        #Grab the track_id and b
+        for i in range(min(2, len(distances))):
+            chosen_players[distances[i][0]] = distances[i][1]
+
+
+        return chosen_players
 
 
 

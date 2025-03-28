@@ -15,65 +15,41 @@ class PlayerTracker:
 
     
     def choose_and_filter_players(self, player_detections, court_keypoints):
+        if not player_detections:  # Prevent index errors
+            return []
+
         if len(self.main_ids) == 0:
             chosen_players = self.choose_players(court_keypoints, player_detections[0])
             self.main_ids = list(chosen_players.keys())
             return [chosen_players]
-        else:
-            main_ids = self.main_ids
-            chosen_players = self.choose_players(court_keypoints, player_detections[-1])
-
-            filtered_player_dict = {}
-            remaining_ids = main_ids.copy()
-            for track_id, bbox in chosen_players.items():
-                if track_id in main_ids:
-                    filtered_player_dict[track_id] = bbox
-                    remaining_ids.remove(track_id)
-                
-            for track_id, bbox in chosen_players.items():
-                if len(remaining_ids) == 0:
-                    break
-                if track_id not in main_ids:
-                    filtered_player_dict[(remaining_ids[0])] = bbox
-                    remaining_ids.remove((remaining_ids[0]))
-            
-            player_detections[-1] = filtered_player_dict
-            return player_detections
-
-       
-
-    def choose_players(self, court_keypoints, player_dict):
-        distances = []
         
-        # If there are no detections, return an empty list
-        if not player_dict:
-            return {}
+        main_ids = self.main_ids
+        chosen_players = self.choose_players(court_keypoints, player_detections[-1])
 
-        # Calculate the center of the court
-        court_center_x = (court_keypoints[0] + court_keypoints[2]) / 2
-        court_center_y = (court_keypoints[1] + court_keypoints[5]) / 2
-        court_center = (court_center_x, court_center_y)
+        filtered_player_dict = {}
+        remaining_ids = main_ids.copy()
 
-        # Go through all detections in the current frame
-        for track_id, bbox in player_dict.items():
-            player_center = get_center_of_bbox(bbox)
+        # First, add players that are already in main_ids
+        for track_id, bbox in chosen_players.items():
+            if track_id in main_ids:
+                filtered_player_dict[track_id] = bbox
+                remaining_ids.remove(track_id)
 
-            # Calculate distance from the player's center to the court center
-            distance = measure_distance(player_center, court_center)
+        # If we lost all tracked players, recover using the closest available players
+        if not filtered_player_dict:
+            self.main_ids = list(chosen_players.keys())[:2]  # Reset main IDs
+            return [chosen_players]  # Ensure we return something
 
-            distances.append((track_id, bbox, distance))
+        # Assign new detections to remaining IDs if needed
+        for track_id, bbox in chosen_players.items():
+            if not remaining_ids:  # Stop if we assigned all available IDs
+                break
+            if track_id not in main_ids:
+                filtered_player_dict[remaining_ids.pop(0)] = bbox
+        
+        player_detections[-1] = filtered_player_dict  # Update the latest frame
+        return player_detections
 
-        # Sort by minimum distance to the court keypoints
-        distances.sort(key=lambda x: x[2])
-
-        chosen_players = {}
-
-        #Grab the track_id and b
-        for i in range(min(2, len(distances))):
-            chosen_players[distances[i][0]] = distances[i][1]
-
-
-        return chosen_players
 
 
 

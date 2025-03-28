@@ -6,7 +6,7 @@ import gc
 import copy
 from utils import (
     get_user_selected_points, create_heatmap, map_detections,
-    overlay_heatmap, save_video
+    overlay_heatmap, save_video, parse_file_name, insert_match
 )
 from trackers import PlayerTracker
 import numpy as np
@@ -57,6 +57,8 @@ def process_video(video_path):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
+            if frame_idx == 10000:
+                break
             ret, frame = cap.read()
             if not ret:
                 break
@@ -71,7 +73,7 @@ def process_video(video_path):
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 
-        
+            #Add checker for scoreboard ROI
 
             # Periodically save detections to disk and free memory
             if frame_idx % chunk_size == 0 and frame_idx > 0:
@@ -105,6 +107,18 @@ def process_video(video_path):
         if file.endswith('.pkl'):
             with open(os.path.join(detections_path, file), 'rb') as f:
                 all_detections.extend(pickle.load(f))
+    
+    #Save all detections to MongoDB
+    
+    # print(all_detections[0], all_detections[-1])
+    # key1_values = [d[1] for d in all_detections]  
+    # key2_values = [d[2] for d in all_detections] 
+
+    # parsed_data = parse_file_name(file_name)
+    # insert_match(parsed_data['Player 1'], parsed_data['Player 2'], parsed_data['Location'], parsed_data['Game #']
+    #             ,parsed_data['skill_rating'], key1_values, key2_values)
+
+    print("Uploaded to MongoDB")
 
     print('Generating Heatmap...')
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
@@ -119,17 +133,19 @@ def process_video(video_path):
     cv2.imwrite(heatmap_path, heatmap)
     print(f"Heatmap saved to: {heatmap_path}")
 
-    #Save to MongoDB
-    tmp = list(player_detections.values())
-    p1_detections, p2_detections = tmp[0], tmp[1]
+   
 
 
 if __name__ == '__main__':
     process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game1_College.mp4")
     # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game2_College.mp4")
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
+    # # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
+    # # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
+    # # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
+    # # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
+
+
+    #Add point start & end frame notes
+    #Query by winner    
     
     

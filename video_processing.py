@@ -42,7 +42,7 @@ def process_video(video_path):
     # Set up video writer
     save_path = f"./output_videos/{file_name}"
     os.makedirs(save_path, exist_ok=True)
-    final_video_path = os.path.join(save_path, f"{filename}.avi")
+    final_video_path = os.path.join(save_path, f"{file_name}.avi")
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     fps = int(cap.get(cv2.CAP_PROP_FPS))

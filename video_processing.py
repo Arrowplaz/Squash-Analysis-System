@@ -48,7 +48,7 @@ def process_video(video_path):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    #out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
+    out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
 
     os.makedirs(detections_path, exist_ok=True)
 
@@ -68,8 +68,8 @@ def process_video(video_path):
             player_detections.append(detections)
             filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
 
-            #output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
-            #out.write(output_frame)  # Write frame directly to video
+            output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
+            out.write(output_frame)  # Write frame directly to video
 
         
 

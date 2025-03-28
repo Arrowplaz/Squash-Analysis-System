@@ -12,6 +12,24 @@ def get_db():
     db = client.get_database("Squash_Data")  
     return db["Honors_Project"] 
 
+def parse_file_name(file_name):
+    parts = file_name.split('_')
+    
+    p1_name = f"{parts[0]} {parts[1]}"  # First two parts form player 1's name
+    p2_name = f"{parts[3]} {parts[4]}"  # Fourth and fifth parts form player 2's name
+    location = parts[5]  # Sixth part is the location
+    game_number = parts[6]  # Seventh part is the game number
+    level_of_play = parts[7]  # Eighth part is the level of play
+
+    return {
+        "Player 1": p1_name,
+        "Player 2": p2_name,
+        "Location": location,
+        "Game #": game_number,
+        "Level of Play": level_of_play
+    }
+
+
 def insert_match(player1, player2, location, game_number, skill_rating, player1_detections, player2_detections):
     """Inserts a new match record into the database."""
     matches = get_db()

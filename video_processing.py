@@ -6,7 +6,7 @@ import gc
 import copy
 from utils import (
     get_user_selected_points, create_heatmap, map_detections,
-    overlay_heatmap, save_video, parse_file_name, insert_match
+    overlay_heatmap, save_video
 )
 from trackers import PlayerTracker
 import numpy as np

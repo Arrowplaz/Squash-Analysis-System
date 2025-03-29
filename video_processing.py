@@ -48,7 +48,7 @@ def process_video(video_path):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
+    # out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
 
     os.makedirs(detections_path, exist_ok=True)
 
@@ -71,8 +71,8 @@ def process_video(video_path):
             filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
             print('Filtering')
             filtered_detections = player_detections
-            output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
-            out.write(output_frame)  # Write frame directly to video
+            # output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
+            # out.write(output_frame)  # Write frame directly to video
 
             #Add checker for scoreboard ROI
 
@@ -98,7 +98,7 @@ def process_video(video_path):
 
 
     cap.release()
-    out.release()
+    # out.release()
     print(f"Final video saved to: {final_video_path}")
 
     # Load all detections for heatmap
@@ -144,6 +144,20 @@ if __name__ == '__main__':
     process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
     process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
     process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game1_College.mp4')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game2_College.mp4')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game3_College.mp4')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game4_College.mp4')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game1_College.mp4')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game2_College.mp4')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game3_College.mp4')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game4_College.mp4')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game1_College.mp4')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game2_College.mp4')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game3_College.mp4')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game4_College.mp4')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game5_College.mp4')
+
 
 
    

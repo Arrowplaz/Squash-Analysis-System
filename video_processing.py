@@ -121,18 +121,18 @@ def process_video(video_path):
 
     print("Uploaded to MongoDB")
 
-    # print('Generating Heatmap...')
-    # court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
-    # warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
-    # mapped_detections = map_detections(all_detections, H)
-    # heatmap = overlay_heatmap(overlay, mapped_detections)
+    print('Generating Heatmap...')
+    court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
+    warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
+    mapped_detections = map_detections(all_detections, H)
+    heatmap = overlay_heatmap(overlay, mapped_detections)
 
-    # save_dir = f"./heatmaps/{file_name}"
-    # os.makedirs(save_dir, exist_ok=True)
-    # timestamp = time.strftime("%Y%m%d-%H%M%S")
-    # heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
-    # cv2.imwrite(heatmap_path, heatmap)
-    # print(f"Heatmap saved to: {heatmap_path}")
+    save_dir = f"./heatmaps/{file_name}"
+    os.makedirs(save_dir, exist_ok=True)
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    heatmap_path = os.path.join(save_dir, f"heatmap_{timestamp}.png")
+    cv2.imwrite(heatmap_path, heatmap)
+    print(f"Heatmap saved to: {heatmap_path}")
 
    
 

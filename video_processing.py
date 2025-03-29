@@ -139,14 +139,13 @@ def process_video(video_path):
 
 if __name__ == '__main__':
     process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game1_College.mp4")
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game2_College.mp4")
-    # # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
-    # # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
-    # # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
-    # # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game2_College.mp4")
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
 
 
-    #Add point start & end frame notes
-    #Query by winner    
+   
     
     

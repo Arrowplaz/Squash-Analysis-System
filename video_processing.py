@@ -141,6 +141,7 @@ def process_video(video_path):
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
     warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
 
+    print(all_detections)
     track_ids = list(all_detections[-1].keys())
     p1_detections = [d[track_ids[0]] for d in all_detections]
     p2_detections = [d[track_ids[1]] for d in all_detections]
@@ -154,7 +155,7 @@ def process_video(video_path):
 
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
-    track_ids = list(player_detections[-1].keys())
+    track_ids = list(all_detections[-1].keys())
     p1_values = [d['a'] for d in data]
     p2_values = [d['b'] for d in data]
 

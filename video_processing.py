@@ -7,7 +7,7 @@ import copy
 from utils import (
     get_user_selected_points, create_heatmap, map_detections,
     overlay_heatmap, save_video, parse_file_name, insert_match,
-    filename_parser
+    filename_parser, get_user_selected_roi, detect_score
 )
 from trackers import PlayerTracker
 import numpy as np
@@ -37,6 +37,9 @@ def process_video(video_path):
     #court_keypoints = get_user_selected_points(first_frame)
     court_keypoints = [709, 536, 1268, 536, 575, 871, 1405, 874]
 
+    print('Select Scoreboard')
+    scoreboard_keypoints = get_user_selected_roi(first_frame)
+
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
 
@@ -54,6 +57,11 @@ def process_video(video_path):
     os.makedirs(detections_path, exist_ok=True)
 
     player_detections = []
+    score_detections = []  # List to store score detections
+    prev_p1_score = -1
+    prev_p2_score = -1
+    last_winner = None
+
     frame_idx = 0
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
@@ -75,18 +83,31 @@ def process_video(video_path):
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 
-            #Add checker for scoreboard ROI
+            #Detect scoreboard
+            player1_score, player2_score = detect_score(frame)
 
-            # Periodically save detections to disk and free memory
-            if frame_idx % chunk_size == 0 and frame_idx > 0:
-                chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
-                with open(chunk_file, 'wb') as f:
-                    pickle.dump(player_detections, f)
-                
-                tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
-                player_detections.clear()  # Free memory
-                gc.collect()
-                player_detections.append(tmp)  # Restore the last frame
+            if player1_score and player2_score:
+                print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+                if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+                    point_winner = None
+                    if player1_score != prev_p1_score and player1_score > prev_p1_score:
+                        point_winner = 'Player 1'
+                    elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+                        point_winner = 'Player 2'
+
+                    # Append score detection only when there is a change
+                    score_detections.append({
+                        'frame_idx': frame_idx,
+                        'player1_score': player1_score,
+                        'player2_score': player2_score,
+                        'point_winner': point_winner
+                    })
+                    print(f"Point Winner: {point_winner}")
+
+                    # Update previous scores
+                    prev_p1_score = player1_score
+                    prev_p2_score = player2_score
+                    last_winner = point_winner
 
 
             frame_idx += 1

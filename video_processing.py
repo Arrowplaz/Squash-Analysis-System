@@ -180,12 +180,6 @@ def process_video(video_path):
 
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
-    print(type(p1_detections))
-    print(type(p2_detections))
-    print(type(court_keypoints))
-    print(type(p1_mapped_detections.tolist()))
-    print(type(p2_mapped_detections.tolist()))
-    return
     insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
                  video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), [])
 

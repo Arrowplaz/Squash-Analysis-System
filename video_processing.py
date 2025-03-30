@@ -83,32 +83,32 @@ def process_video(video_path):
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 
-            #Detect scoreboard
-            player1_score, player2_score = detect_score(frame)
-            player1_score, player2_score = int(player1_score), int(player2_score)
+            # #Detect scoreboard
+            # player1_score, player2_score = detect_score(frame)
+            # player1_score, player2_score = int(player1_score), int(player2_score)
 
-            if player1_score and player2_score:
-                print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
-                if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
-                    point_winner = None
-                    if player1_score != prev_p1_score and player1_score > prev_p1_score:
-                        point_winner = 'Player 1'
-                    elif player2_score != prev_p2_score and player2_score > prev_p2_score:
-                        point_winner = 'Player 2'
+            # if player1_score and player2_score:
+            #     print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+            #     if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+            #         point_winner = None
+            #         if player1_score != prev_p1_score and player1_score > prev_p1_score:
+            #             point_winner = 'Player 1'
+            #         elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+            #             point_winner = 'Player 2'
 
-                    # Append score detection only when there is a change
-                    score_detections.append({
-                        'frame_idx': frame_idx,
-                        'player1_score': player1_score,
-                        'player2_score': player2_score,
-                        'point_winner': point_winner
-                    })
-                    print(f"Point Winner: {point_winner}")
+            #         # Append score detection only when there is a change
+            #         score_detections.append({
+            #             'frame_idx': frame_idx,
+            #             'player1_score': player1_score,
+            #             'player2_score': player2_score,
+            #             'point_winner': point_winner
+            #         })
+            #         print(f"Point Winner: {point_winner}")
 
-                    # Update previous scores
-                    prev_p1_score = player1_score
-                    prev_p2_score = player2_score
-                    last_winner = point_winner
+            #         # Update previous scores
+            #         prev_p1_score = player1_score
+            #         prev_p2_score = player2_score
+            #         last_winner = point_winner
 
 
             frame_idx += 1
@@ -120,7 +120,7 @@ def process_video(video_path):
                     player_detections.extend(pickle.load(f))
 
 
-    print(score_detections)
+    # print(score_detections)
 
     cap.release()
     out.release()
@@ -134,15 +134,32 @@ def process_video(video_path):
             with open(os.path.join(detections_path, file), 'rb') as f:
                 all_detections.extend(pickle.load(f))
     
-    print("Uploaded to MongoDB")
-    video_data = filename_parser(file_name)
+    
 
 
     print('Generating Heatmap...')
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
     warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
+
+    track_ids = list(all_detections[-1].keys())
+    p1_detections = [d[track_ids[0]] for d in all_detections]
+    p2_detections = [d[track_ids[1]] for d in all_detections]
+
+    p1_mapped_detections = map_detections(p1_detections, H)
+    p2_mapped_detections = map_detections(p2_detections, H)
+    
     mapped_detections = map_detections(all_detections, H)
     heatmap = overlay_heatmap(overlay, mapped_detections)
+
+
+    print("Uploaded to MongoDB")
+    video_data = filename_parser(file_name)
+    track_ids = list(player_detections[-1].keys())
+    p1_values = [d['a'] for d in data]
+    p2_values = [d['b'] for d in data]
+
+    insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
+                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections, p2_mapped_detections, [])
 
     save_dir = f"./heatmaps/{file_name}"
     os.makedirs(save_dir, exist_ok=True)

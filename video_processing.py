@@ -6,7 +6,8 @@ import gc
 import copy
 from utils import (
     get_user_selected_points, create_heatmap, map_detections,
-    overlay_heatmap, save_video, parse_file_name, insert_match
+    overlay_heatmap, save_video, parse_file_name, insert_match,
+    filename_parser
 )
 from trackers import PlayerTracker
 import numpy as np
@@ -48,7 +49,7 @@ def process_video(video_path):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    # out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
+    out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
 
     os.makedirs(detections_path, exist_ok=True)
 
@@ -57,8 +58,8 @@ def process_video(video_path):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            # if frame_idx == 1000:
-            #     break
+            if frame_idx == 1000:
+                break
             ret, frame = cap.read()
             if not ret:
                 break
@@ -71,8 +72,8 @@ def process_video(video_path):
             filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
             print('Filtering')
             filtered_detections = player_detections
-            # output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
-            # out.write(output_frame)  # Write frame directly to video
+            output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
+            out.write(output_frame)  # Write frame directly to video
 
             #Add checker for scoreboard ROI
 
@@ -98,7 +99,7 @@ def process_video(video_path):
 
 
     cap.release()
-    # out.release()
+    out.release()
     print(f"Final video saved to: {final_video_path}")
 
     # Load all detections for heatmap
@@ -109,17 +110,9 @@ def process_video(video_path):
             with open(os.path.join(detections_path, file), 'rb') as f:
                 all_detections.extend(pickle.load(f))
     
-    #Save all detections to MongoDB
-    
-    # print(all_detections[0], all_detections[-1])
-    # key1_values = [d[1] for d in all_detections]  
-    # key2_values = [d[2] for d in all_detections] 
-
-    # parsed_data = parse_file_name(file_name)
-    # insert_match(parsed_data['Player 1'], parsed_data['Player 2'], parsed_data['Location'], parsed_data['Game #']
-    #             ,parsed_data['skill_rating'], key1_values, key2_values)
-
     print("Uploaded to MongoDB")
+    video_data = filename_parser(file_name)
+
 
     print('Generating Heatmap...')
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
@@ -139,24 +132,24 @@ def process_video(video_path):
 
 if __name__ == '__main__':
     process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game1_College.mp4")
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game2_College.mp4")
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game1_College.mp4')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game2_College.mp4')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game3_College.mp4')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game4_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game1_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game2_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game3_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game4_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game1_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game2_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game3_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game4_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game5_College.mp4')
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game2_College.mp4")
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game3_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game1_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game2_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_US_Game3_College.mp4")
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game1_College.mp4')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game2_College.mp4')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game3_College.mp4')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_US_Game4_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game1_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game2_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game3_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_US_Game4_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game1_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game2_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game3_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game4_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_US_Game5_College.mp4')
 
 
 

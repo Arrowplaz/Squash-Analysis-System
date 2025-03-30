@@ -20,3 +20,38 @@ def save_video(output_video_frames, output_video_path):
     for frame in output_video_frames:
         out.write(frame)
     out.release()
+
+
+def filename_parser(file_name):
+    sections = file_name.split('_')
+    
+    P1_name, P2_name = '', ''
+    
+    idx = 0
+    v_found = False
+    
+    while idx < len(sections) and sections[idx][0] != '#':
+        if sections[idx] == 'V':
+            v_found = True
+        elif not v_found:
+            P1_name += (' ' + sections[idx] if P1_name else sections[idx])  # Avoid leading space
+        else:
+            P2_name += (' ' + sections[idx] if P2_name else sections[idx])  # Avoid leading space
+        
+        idx += 1
+    
+   
+    country = sections[idx][1:] if idx < len(sections) and sections[idx][0] == '#' else ''
+    game_number = sections[idx + 1][-1] if idx + 1 < len(sections) else ''
+    skill_level = sections[idx + 2] if idx + 2 < len(sections) else ''
+    
+    return {
+        "Player 1": P1_name,
+        "Player 2": P2_name,
+        "Country": country,
+        "Game Number": game_number,
+        "Skill Level": skill_level
+    }
+
+
+

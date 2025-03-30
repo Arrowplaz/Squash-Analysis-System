@@ -37,8 +37,8 @@ def process_video(video_path):
     #court_keypoints = get_user_selected_points(first_frame)
     court_keypoints = [709, 536, 1268, 536, 575, 871, 1405, 874]
 
-    print('Select Scoreboard')
-    scoreboard_keypoints = get_user_selected_roi(first_frame)
+    # print('Select Scoreboard')
+    # scoreboard_keypoints = get_user_selected_roi(first_frame)
 
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
@@ -57,10 +57,10 @@ def process_video(video_path):
     os.makedirs(detections_path, exist_ok=True)
 
     player_detections = []
-    score_detections = []  # List to store score detections
-    prev_p1_score = -1
-    prev_p2_score = -1
-    last_winner = None
+    # score_detections = []  # List to store score detections
+    # prev_p1_score = -1
+    # prev_p2_score = -1
+    # last_winner = None
 
     frame_idx = 0
     chunk_size = 1000  # Save every 1000 frames
@@ -162,7 +162,7 @@ def process_video(video_path):
                  video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections, p2_mapped_detections, [])
 
     print("Uploaded to Mongo")
-    
+
     save_dir = f"./heatmaps/{file_name}"
     os.makedirs(save_dir, exist_ok=True)
     timestamp = time.strftime("%Y%m%d-%H%M%S")

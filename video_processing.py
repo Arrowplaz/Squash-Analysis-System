@@ -170,9 +170,11 @@ def process_video(video_path):
         if track_ids[1] in d:
             p2_detections.append(d[track_ids[1]])
 
-    p1_mapped_detections = map_detections(p1_detections, H)
-    p2_mapped_detections = map_detections(p2_detections, H)
-
+    p1_tmp = [{1: value} for value in p1_detections]
+    p2_tmp = [{2: value} for value in p2_detections]
+    p1_mapped_detections = map_detections(p1_tmp, H)
+    p2_mapped_detections = map_detections(p2_tmp, H)
+    
     mapped_detections = map_detections(all_detections, H)
     heatmap = overlay_heatmap(overlay, mapped_detections)
 

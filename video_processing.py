@@ -160,7 +160,7 @@ def process_video(video_path):
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
     warped_image, overlay, H = create_heatmap(first_frame, court_keypoints)
 
-    track_ids = list(all_detections[-1].keys())
+    track_ids = player_tracker.main_ids
     p1_detections = []
     p2_detections = []
     for d in all_detections:

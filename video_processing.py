@@ -147,7 +147,7 @@ def process_video(video_path):
 
     p1_mapped_detections = map_detections(p1_detections, H)
     p2_mapped_detections = map_detections(p2_detections, H)
-    
+
     mapped_detections = map_detections(all_detections, H)
     heatmap = overlay_heatmap(overlay, mapped_detections)
 
@@ -161,6 +161,8 @@ def process_video(video_path):
     insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
                  video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections, p2_mapped_detections, [])
 
+    print("Uploaded to Mongo")
+    
     save_dir = f"./heatmaps/{file_name}"
     os.makedirs(save_dir, exist_ok=True)
     timestamp = time.strftime("%Y%m%d-%H%M%S")

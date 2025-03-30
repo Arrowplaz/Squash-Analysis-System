@@ -6,7 +6,9 @@ score_box_coords = []
 def get_user_selected_roi(frame):
     global score_box_coords
     print("Select the region of interest (ROI) for the scoreboard.")
+    cv2.namedWindow("Select Scoreboard ROI", cv2.WINDOW_FULLSCREEN)
     score_box_coords = cv2.selectROI("Select Scoreboard ROI", frame, fromCenter=False, showCrosshair=True)
+    
     cv2.destroyAllWindows()
 
 # Function to detect the score from the scoreboard

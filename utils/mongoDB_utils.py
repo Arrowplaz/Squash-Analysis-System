@@ -31,7 +31,7 @@ def parse_file_name(file_name):
 
 
 def insert_match(player1, player2, location, game_number, skill_rating, player1_origin_detections, player2_origin_detections,
-                 court_detections, player1_transformed_detections, player2_transformed_detections):
+                 court_detections, player1_transformed_detections, player2_transformed_detections, points):
     """Inserts a new match record into the database."""
     matches = get_db()
     match_data = {
@@ -44,9 +44,10 @@ def insert_match(player1, player2, location, game_number, skill_rating, player1_
         "player2_origin_detections": player2_detections,
         "court detections": court_detections,
         "player1_transformed_detections": player1_transformed_detections,
-        "player2_transformed_detections": player2_transformed_detections  
+        "player2_transformed_detections": player2_transformed_detections,
+        "points": points
     }
-    
+
     result = matches.insert_one(match_data)
     return result.inserted_id
 

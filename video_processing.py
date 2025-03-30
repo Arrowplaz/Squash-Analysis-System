@@ -66,7 +66,7 @@ def process_video(video_path):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            if frame_idx == 1000:
+            if frame_idx == 5000:
                 break
             ret, frame = cap.read()
             if not ret:
@@ -110,7 +110,9 @@ def process_video(video_path):
             #         prev_p2_score = player2_score
             #         last_winner = point_winner
             # Periodically save detections to disk and free memory
+
             if frame_idx % chunk_size == 0 and frame_idx > 0:
+                print('Saving')
                 chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
                 with open(chunk_file, 'wb') as f:
                     pickle.dump(player_detections, f)

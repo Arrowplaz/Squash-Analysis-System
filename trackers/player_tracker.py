@@ -18,7 +18,7 @@ class PlayerTracker:
         if not player_detections:  
             return []
 
-        if len(self.main_ids) == 0:
+        if len(self.main_ids) < 2:
             chosen_players = self.choose_players(court_keypoints, player_detections[0])
             self.main_ids = list(chosen_players.keys())
             return [chosen_players]

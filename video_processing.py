@@ -85,6 +85,7 @@ def process_video(video_path):
 
             #Detect scoreboard
             player1_score, player2_score = detect_score(frame)
+            player1_score, player2_score = int(player1_score), int(player2_score)
 
             if player1_score and player2_score:
                 print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
@@ -118,6 +119,8 @@ def process_video(video_path):
                 with open(os.path.join(detections_path, file), 'rb') as f:
                     player_detections.extend(pickle.load(f))
 
+
+    print(score_detections)
 
     cap.release()
     out.release()

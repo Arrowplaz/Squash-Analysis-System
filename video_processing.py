@@ -124,6 +124,11 @@ def process_video(video_path):
 
 
             frame_idx += 1
+        #Make sure last little bit is saved too
+        chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
+        with open(chunk_file, 'wb') as f:
+            pickle.dump(player_detections, f)
+        player_detections.clear()
     else:
         print(f"Detections for {file_name} already exists. Skipping video processing.")
         for file in sorted(os.listdir(detections_path)):
@@ -131,6 +136,8 @@ def process_video(video_path):
                 with open(os.path.join(detections_path, file), 'rb') as f:
                     player_detections.extend(pickle.load(f))
 
+
+    
 
     # print(score_detections)
 
@@ -155,8 +162,13 @@ def process_video(video_path):
 
     print(all_detections)
     track_ids = list(all_detections[-1].keys())
-    p1_detections = [d[track_ids[0]] for d in all_detections]
-    p2_detections = [d[track_ids[1]] for d in all_detections]
+    p1_detections = []
+    p2_detections = []
+    for d in all_detections:
+        if track_ids[0] in d:
+            p1_detections.append(d[track_ids[0]])
+        if track_ids[1] in d:
+            p2_detections.append(d[track_ids[1]])
 
     p1_mapped_detections = map_detections(p1_detections, H)
     p2_mapped_detections = map_detections(p2_detections, H)
@@ -167,10 +179,6 @@ def process_video(video_path):
 
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
-    track_ids = list(all_detections[-1].keys())
-    p1_values = [d['a'] for d in data]
-    p2_values = [d['b'] for d in data]
-
     insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
                  video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections, p2_mapped_detections, [])
 

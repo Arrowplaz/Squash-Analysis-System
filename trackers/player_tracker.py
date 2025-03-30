@@ -5,7 +5,6 @@ import sys
 import os
 sys.path.append("../")
 from utils import get_center_of_bbox, measure_distance
-import numpy as np
 
 class PlayerTracker:
     
@@ -15,9 +14,8 @@ class PlayerTracker:
         self.main_ids = []
 
     
-
     def choose_and_filter_players(self, player_detections, court_keypoints):
-        if not player_detections: 
+        if not player_detections:  
             return []
 
         if len(self.main_ids) == 0:
@@ -31,45 +29,22 @@ class PlayerTracker:
         filtered_player_dict = {}
         remaining_ids = main_ids.copy()
 
-        def color_similarity(color1, color2):
-            return np.linalg.norm(np.array(color1) - np.array(color2))  
-
         for track_id, bbox in chosen_players.items():
             if track_id in main_ids:
                 filtered_player_dict[track_id] = bbox
                 remaining_ids.remove(track_id)
 
-        if not filtered_player_dict:
-            for i, track_id in enumerate(main_ids):
-                if track_id in chosen_players:
-                    filtered_player_dict[track_id] = chosen_players[track_id]
-                else:
-                    original_color = self.get_player_color(track_id)
-                    closest_match = None
-                    min_color_diff = float('inf')
-                    
-                    for new_id, new_bbox in chosen_players.items():
-                        new_color = new_bbox['color']
-                        color_diff = color_similarity(original_color, new_color)
-                        
-                        if color_diff < min_color_diff:
-                            min_color_diff = color_diff
-                            closest_match = new_id
-                    
-                    if closest_match is not None:
-                        filtered_player_dict[closest_match] = chosen_players[closest_match]
-                        self.main_ids[i] = closest_match 
-
-            return [filtered_player_dict]
-        
+        # Assign new detections to remaining IDs if needed
         for track_id, bbox in chosen_players.items():
             if not remaining_ids:  
                 break
             if track_id not in main_ids:
                 filtered_player_dict[remaining_ids.pop(0)] = bbox
-
-        player_detections[-1] = filtered_player_dict  
+        
+        player_detections[-1] = filtered_player_dict 
         return player_detections
+
+       
 
     def choose_players(self, court_keypoints, player_dict):
         distances = []

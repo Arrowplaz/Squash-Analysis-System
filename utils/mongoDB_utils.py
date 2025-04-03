@@ -42,7 +42,7 @@ def insert_match(player1, player2, location, game_number, skill_rating, player1_
         "skill_rating": skill_rating,
         "player1_origin_detections": player1_origin_detections, 
         "player2_origin_detections": player2_origin_detections,
-        "court detections": court_detections,
+        "court_detections": court_detections,
         "player1_transformed_detections": player1_transformed_detections,
         "player2_transformed_detections": player2_transformed_detections,
         "points": points
@@ -75,18 +75,25 @@ def delete_match(match_id):
 
 
 
+
 def main():
     """For Testing"""
     dummy_id = insert_match(
-        player1="John Doe",
-        player2="Jane Smith",
-        location="New York Squash Club",
+        player1='',
+        player2='',
+        location='',
         game_number=1,
-        skill_rating="Advanced",
-        player1_detections=[1, 2, 3, 4, 6],
-        player2_detections=[7, 8, 0]
+        skill_rating='',
+        player1_origin_detections=[1, 2, 3, 4, 6],
+        player2_origin_detections=[7, 8, 0],
+        court_detections=[],
+        player1_transformed_detections=[],
+        player2_transformed_detections=[],
+        points=[]
     )
     print(f"Inserted dummy match with ID: {dummy_id}")
 
 if __name__ == "__main__":
     main()
+
+

@@ -34,9 +34,9 @@ def filename_parser(file_name):
         if sections[idx] == 'V':
             v_found = True
         elif not v_found:
-            P1_name += (' ' + sections[idx] if P1_name else sections[idx])  # Avoid leading space
+            P1_name += (' ' + sections[idx] if P1_name else sections[idx]) 
         else:
-            P2_name += (' ' + sections[idx] if P2_name else sections[idx])  # Avoid leading space
+            P2_name += (' ' + sections[idx] if P2_name else sections[idx])
         
         idx += 1
     
@@ -52,6 +52,13 @@ def filename_parser(file_name):
         "Game Number": game_number,
         "Skill Level": skill_level
     }
+
+def main():
+    print(filename_parser("Arav_Bhagwati_V_Nicholas_Spizzirri_US_Game1_College"))
+
+if __name__ == "__main__":
+    main()
+    
 
 
 

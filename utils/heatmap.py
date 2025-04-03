@@ -21,7 +21,7 @@ def add_overlay(heatmap, height, width, padding=50):
     bottom_right = (width + padding, height + padding)
     
     # Draw the outer rectangle
-    cv2.rectangle(heatmap, top_left, bottom_right, (50, 50, 50), 2)
+    cv2.rectangle(heatmap, top_left, bottom_right, (50, 50, 50), 5)
     
     # Calculate dimensions
     length_in_pixels = bottom_left[1] - top_left[1]
@@ -30,11 +30,11 @@ def add_overlay(heatmap, height, width, padding=50):
     # Draw short line (using real-world ratio: 5.44 / 9.75)
     short_line_ratio = 5.44 / 9.75
     short_line_draw_y = int((length_in_pixels * short_line_ratio) + top_left[1])
-    cv2.line(heatmap, (top_left[0], short_line_draw_y), (top_right[0], short_line_draw_y), (50, 50, 50), 2)
+    cv2.line(heatmap, (top_left[0], short_line_draw_y), (top_right[0], short_line_draw_y), (50, 50, 50), 10)
     
     # Draw mid-court line
     mid_court_line_draw_x = int((width_in_pixels * 0.5) + top_left[0])
-    cv2.line(heatmap, (mid_court_line_draw_x, bottom_left[1]), (mid_court_line_draw_x, short_line_draw_y), (50, 50, 50), 2)
+    cv2.line(heatmap, (mid_court_line_draw_x, bottom_left[1]), (mid_court_line_draw_x, short_line_draw_y), (50, 50, 50), 10)
     
     # Service box dimensions in meters (converted to pixels)
     service_box_length_m = 1.6
@@ -45,12 +45,12 @@ def add_overlay(heatmap, height, width, padding=50):
     # Left service box (from top-left)
     box1_top_left = (top_left[0], short_line_draw_y)
     box1_bottom_right = (top_left[0] + service_box_pixel_width, short_line_draw_y + service_box_pixel_length)
-    cv2.rectangle(heatmap, box1_top_left, box1_bottom_right, (50, 50, 50), 2)
+    cv2.rectangle(heatmap, box1_top_left, box1_bottom_right, (50, 50, 50), 10)
     
     # Right service box (from top-right)
     box2_top_left = (top_right[0] - service_box_pixel_width, short_line_draw_y)
     box2_bottom_right = (top_right[0], short_line_draw_y + service_box_pixel_length)
-    cv2.rectangle(heatmap, box2_top_left, box2_bottom_right, (50, 50, 50), 2)
+    cv2.rectangle(heatmap, box2_top_left, box2_bottom_right, (50, 50, 50), 10)
     
     return heatmap
 
@@ -83,7 +83,6 @@ def create_heatmap(frame, court_keypoints, overlay_width=1800):
         [overlay_width, (overlay_height * 7.04) / 9.75]
     ], dtype=np.float32)
     
-    # court_keypoints = [(951, 754), (1952, 754), (714, 1344), (2176, 1342), (598, 1576), (2271, 1575)]
     # Convert court keypoints to NumPy array and compute the homography matrix
     src_points = np.array(court_keypoints, dtype=np.float32)
     homography_matrix, status = cv2.findHomography(src_points, overlay_corners)
@@ -134,10 +133,10 @@ def overlay_heatmap(composite, mapped_detections):
     # Accumulate intensity at detected points
     for (x, y) in mapped_detections:
         x, y = int(x), int(y)  # Ensure coordinates are integers
-        cv2.circle(heatmap, (x, y), radius=20, color=255, thickness=-1)  # Larger radius for spread
+        cv2.circle(heatmap, (x, y), radius=10, color=255, thickness=-1)  # Larger radius for spread
 
     # Apply Gaussian blur for a smoother heatmap
-    heatmap = cv2.GaussianBlur(heatmap, (35, 35), 0) #Potentially make the kernal larger
+    heatmap = cv2.GaussianBlur(heatmap, (101, 101), 50) #Potentially make the kernal larger
 
     # Normalize heatmap to range 0-255
     heatmap = cv2.normalize(heatmap, None, 0, 255, cv2.NORM_MINMAX)
@@ -151,8 +150,21 @@ def overlay_heatmap(composite, mapped_detections):
 
     # # Display the final result
     # cv2.setWindowProperty("Court with Heatmap", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    # cv2.imshow("Court with Heatmap", heatmap_overlay)
-    # cv2.waitKey(0)
+    cv2.imshow("Court with Heatmap", heatmap_overlay)
+    cv2.waitKey(0)
 
     return heatmap
+
+
+
+def compute_distance_traveled(positions):
+    print(type(positions[0]))
+    return
+    distances = [0.0]  # Start with 0 for the first frame
+    for i in range(1, len(positions)):
+        x1, y1 = positions[i-1]
+        x2, y2 = positions[i]
+        distance = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        distances.append(distance)
+    return distances
 

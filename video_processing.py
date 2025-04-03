@@ -7,7 +7,7 @@ import copy
 from utils import (
     get_user_selected_points, create_heatmap, map_detections,
     overlay_heatmap, save_video, parse_file_name, insert_match,
-    filename_parser, get_user_selected_roi, detect_score
+    filename_parser, get_user_selected_roi, detect_score, compute_distance_traveled
 )
 from trackers import PlayerTracker
 import numpy as np
@@ -57,17 +57,17 @@ def process_video(video_path):
     os.makedirs(detections_path, exist_ok=True)
 
     player_detections = []
-    # score_detections = []  # List to store score detections
-    # prev_p1_score = -1
-    # prev_p2_score = -1
-    # last_winner = None
+    score_detections = []  # List to store score detections
+    prev_p1_score = -1
+    prev_p2_score = -1
+    last_winner = None
 
     frame_idx = 0
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            # if frame_idx == 5000:
-            #     break
+            if frame_idx == 1000:
+                break
             ret, frame = cap.read()
             if not ret:
                 break
@@ -83,32 +83,32 @@ def process_video(video_path):
             # output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             # out.write(output_frame)  # Write frame directly to video
 
-            # #Detect scoreboard
-            # player1_score, player2_score = detect_score(frame)
-            # player1_score, player2_score = int(player1_score), int(player2_score)
+            #Detect scoreboard
+            player1_score, player2_score = detect_score(frame)
+            player1_score, player2_score = int(player1_score), int(player2_score)
 
-            # if player1_score and player2_score:
-            #     print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
-            #     if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
-            #         point_winner = None
-            #         if player1_score != prev_p1_score and player1_score > prev_p1_score:
-            #             point_winner = 'Player 1'
-            #         elif player2_score != prev_p2_score and player2_score > prev_p2_score:
-            #             point_winner = 'Player 2'
+            if player1_score and player2_score:
+                print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+                if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+                    point_winner = None
+                    if player1_score != prev_p1_score and player1_score > prev_p1_score:
+                        point_winner = 'Player 1'
+                    elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+                        point_winner = 'Player 2'
 
-            #         # Append score detection only when there is a change
-            #         score_detections.append({
-            #             'frame_idx': frame_idx,
-            #             'player1_score': player1_score,
-            #             'player2_score': player2_score,
-            #             'point_winner': point_winner
-            #         })
-            #         print(f"Point Winner: {point_winner}")
+                    # Append score detection only when there is a change
+                    score_detections.append({
+                        'frame_idx': frame_idx,
+                        'player1_score': player1_score,
+                        'player2_score': player2_score,
+                        'point_winner': point_winner
+                    })
+                    print(f"Point Winner: {point_winner}")
 
-            #         # Update previous scores
-            #         prev_p1_score = player1_score
-            #         prev_p2_score = player2_score
-            #         last_winner = point_winner
+                    # Update previous scores
+                    prev_p1_score = player1_score
+                    prev_p2_score = player2_score
+                    last_winner = point_winner
             # Periodically save detections to disk and free memory
 
             if frame_idx % chunk_size == 0 and frame_idx > 0:
@@ -139,7 +139,8 @@ def process_video(video_path):
 
     
 
-    # print(score_detections)
+    print(score_detections)
+    return
 
     cap.release()
     # out.release()
@@ -183,11 +184,16 @@ def process_video(video_path):
     mapped_detections = map_detections(all_detections, H)
     heatmap = overlay_heatmap(overlay, mapped_detections)
 
+    #Show distance graph
+    #compute_distance_traveled(p1_mapped_detections)
+
+
+
 
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
-    insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
-                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), [])
+    #insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
+                 #video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), [])
 
     print("Uploaded to Mongo")
 
@@ -203,24 +209,24 @@ def process_video(video_path):
 
 if __name__ == '__main__':
     process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4")
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4")
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4")
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4")
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game1_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game2_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game3_College.mp4')
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game4_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game1_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game2_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game3_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game4_College.mp4')
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game5_College.mp4')
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4")
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4")
+    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4")
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game1_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game2_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game3_College.mp4')
+    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game4_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game1_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game2_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game3_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game4_College.mp4')
+    # process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game5_College.mp4')
 
 
 

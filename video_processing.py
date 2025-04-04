@@ -126,13 +126,12 @@ def process_video(video_path, scoreboard_points):
             frame_idx += 1
         #Make sure last little bit is saved too
         chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
-        score_file = os.path.join(score_detections, f"scores.pkl")
+        score_file = os.path.join(detections_path, f"scores.pkl")
         # with open(chunk_file, 'wb') as f:
         #     pickle.dump(player_detections, f)
         with open(score_file, 'wb') as f:
             pickle.dump(score_file, f) 
         player_detections.clear()
-        score_detections.clear()
 
     else:
         print(f"Detections for {file_name} already exists. Skipping video processing.")

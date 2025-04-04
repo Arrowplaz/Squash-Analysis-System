@@ -12,7 +12,7 @@ from utils import (
 from trackers import PlayerTracker
 import numpy as np
 
-def process_video(video_path, scoreboard_points):
+def process_video(video_path, scoreboard_points, gender):
     #os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
     print('Opening Video')
     base_name = os.path.basename(video_path)
@@ -204,7 +204,7 @@ def process_video(video_path, scoreboard_points):
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
     insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
-                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections)
+                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections, gender)
 
     print("Uploaded to Mongo")
 
@@ -221,23 +221,23 @@ def process_video(video_path, scoreboard_points):
 if __name__ == '__main__':
     #process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88])
     # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4", [1106, 958, 38, 83])
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1144, 954, 38, 90])
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4", [1064, 957, 38, 84])
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4", [1106, 957, 35, 84])
-    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4", [1144, 954, 38, 90])
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4', [1064, 954, 37, 88])
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83])
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90])
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4', [1185, 957, 39, 83])
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game1_College.mp4', [1064, 954, 37, 88])
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game2_College.mp4', [1106, 958, 38, 83])
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game3_College.mp4', [1144, 954, 38, 90])
-    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game4_College.mp4', [1185, 957, 39, 83])
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game1_College.mp4', [1064, 954, 37, 88])
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game2_College.mp4', [1106, 958, 38, 83])
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game3_College.mp4', [1144, 954, 38, 90])
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game4_College.mp4', [1185, 957, 39, 83])
-    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game5_College.mp4', [1226, 954, 39, 88])
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4", [1064, 957, 38, 84], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4", [1106, 957, 35, 84], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
+    process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game5_College.mp4', [1226, 954, 39, 88], 'F')
 
 
 

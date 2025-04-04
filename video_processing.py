@@ -13,7 +13,7 @@ from trackers import PlayerTracker
 import numpy as np
 
 def process_video(video_path, scoreboard_points, gender):
-    #os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
+    os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
     print('Opening Video')
     base_name = os.path.basename(video_path)
     file_name, _ = os.path.splitext(base_name)
@@ -25,11 +25,11 @@ def process_video(video_path, scoreboard_points, gender):
     heatmap_save_dir = f"./heatmaps/{file_name}"
     cap = cv2.VideoCapture(video_path)
 
-    # if not cap.isOpened():
-    #     print("Error: Could not open video.")
-    #     return
+    if not cap.isOpened():
+        print("Error: Could not open video.")
+        return
 
-    # ret, first_frame = cap.read()
+    ret, first_frame = cap.read()
     if not ret:
         print('Error: Could not read first frame.')
         return

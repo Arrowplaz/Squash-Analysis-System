@@ -65,10 +65,10 @@ def process_video(video_path, scoreboard_points):
 
     frame_idx = 0
     chunk_size = 1000  # Save every 1000 frames
-    if os.listdir(detections_path) == []:
+    if 1 == 1:
         while cap.isOpened():
-            if frame_idx == 10000:
-                break
+            # if frame_idx == 10000:
+            #     break
             ret, frame = cap.read()
             if not ret:
                 break
@@ -76,10 +76,10 @@ def process_video(video_path, scoreboard_points):
             print(f'Processing frame: {frame_idx}')
 
             # Process and track players
-            detections = player_tracker.detect_frame(frame)
-            player_detections.append(detections)
-            filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
-            filtered_detections = player_detections
+            # detections = player_tracker.detect_frame(frame)
+            # player_detections.append(detections)
+            # filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
+            # filtered_detections = player_detections
             # output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             # out.write(output_frame)  # Write frame directly to video
 
@@ -111,24 +111,29 @@ def process_video(video_path, scoreboard_points):
                     last_winner = point_winner
             # Periodically save detections to disk and free memory
 
-            if frame_idx % chunk_size == 0 and frame_idx > 0:
-                print('Saving')
-                chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
-                with open(chunk_file, 'wb') as f:
-                    pickle.dump(player_detections, f)
+            # if frame_idx % chunk_size == 0 and frame_idx > 0:
+            #     print('Saving')
+            #     chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
+            #     with open(chunk_file, 'wb') as f:
+            #         pickle.dump(player_detections, f)
                 
-                tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
-                player_detections.clear()  # Free memory
-                gc.collect()
-                player_detections.append(tmp)  # Restore the last frame
+            #     tmp = copy.deepcopy(player_detections[-1])  # Ensure a full copy
+            #     player_detections.clear()  # Free memory
+            #     gc.collect()
+            #     player_detections.append(tmp)  # Restore the last frame
 
 
             frame_idx += 1
         #Make sure last little bit is saved too
         chunk_file = os.path.join(detections_path, f"detections_{frame_idx}.pkl")
-        with open(chunk_file, 'wb') as f:
-            pickle.dump(player_detections, f)
+        score_file = os.path.join(score_detections, f"scores.pkl")
+        # with open(chunk_file, 'wb') as f:
+        #     pickle.dump(player_detections, f)
+        with open(score_file, 'wb') as f:
+            pickle.dump(score_file, f) 
         player_detections.clear()
+        score_detections.clear()
+
     else:
         print(f"Detections for {file_name} already exists. Skipping video processing.")
         for file in sorted(os.listdir(detections_path)):
@@ -206,7 +211,7 @@ def process_video(video_path, scoreboard_points):
 
 
 if __name__ == '__main__':
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88])
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88])
     process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4", [1106, 958, 38, 83])
     process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1144, 954, 38, 90])
     process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4", [1064, 957, 38, 84])

@@ -87,7 +87,7 @@ def process_video(video_path, scoreboard_points, gender):
             player1_score, player2_score = detect_score(frame)
             player1_score, player2_score = int(player1_score), int(player2_score)
 
-            if player1_score and player2_score:
+            if player1_score is not None and player2_score is not None:
                 print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
                 if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
                     point_winner = None
@@ -153,17 +153,6 @@ def process_video(video_path, scoreboard_points, gender):
             with open(os.path.join(detections_path, file), 'rb') as f:
                 score_detections.extend(pickle.load(f))
     
-    
-    score_detections_2 = [
-    {'frame_idx': 50, 'player1_score': 0, 'player2_score': 0, 'point_winner': None},
-    {'frame_idx': 400, 'player1_score': 1, 'player2_score': 0, 'point_winner': 'player1'},
-    {'frame_idx': 950, 'player1_score': 1, 'player2_score': 1, 'point_winner': 'player2'},
-    {'frame_idx': 1600, 'player1_score': 2, 'player2_score': 1, 'point_winner': 'player1'},
-    {'frame_idx': 2200, 'player1_score': 2, 'player2_score': 2, 'point_winner': 'player2'},
-    {'frame_idx': 2900, 'player1_score': 3, 'player2_score': 2, 'point_winner': 'player1'},
-    {'frame_idx': 3500, 'player1_score': 3, 'player2_score': 3, 'point_winner': 'player2'},
-    {'frame_idx': 4200, 'player1_score': 4, 'player2_score': 3, 'point_winner': 'player1'},
-    ]
 
     print('Generating Heatmap...')
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
@@ -174,12 +163,11 @@ def process_video(video_path, scoreboard_points, gender):
     for d in all_detections:
         if len(list(d.keys())) == 2:
             track_ids = list(d.keys())
-            
             break
 
     p1_detections = []
     p2_detections = []
-    # 
+    
     for d in all_detections:
         if track_ids[0] in d:
             p1_detections.append(d[track_ids[0]])
@@ -218,20 +206,20 @@ def process_video(video_path, scoreboard_points, gender):
 
 
 if __name__ == '__main__':
-    #process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88])
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4", [1106, 958, 38, 83])
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4", [1064, 957, 38, 84], 'M')
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4", [1106, 957, 35, 84], 'M')
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
-    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
-    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
-    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
-    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88])
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4", [1106, 958, 38, 83])
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4", [1064, 957, 38, 84], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4", [1106, 957, 35, 84], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
     process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
     process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
     process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
-    # process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
+    process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
     process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
     process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
     process_video('./input_videos/Noa_Romero_V_Lucie_Stefanoni_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')

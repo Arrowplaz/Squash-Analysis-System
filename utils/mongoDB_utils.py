@@ -38,6 +38,7 @@ def insert_match(player1, player2, location, game_number, skill_rating, player1_
         "player1": player1,
         "player2": player2,
         "location": location,
+        'Gender': 'M',
         "game_number": game_number,
         "skill_rating": skill_rating,
         "player1_origin_detections": player1_origin_detections, 

@@ -167,6 +167,7 @@ def process_video(video_path, scoreboard_points):
 
     p1_detections = []
     p2_detections = []
+    print(all_detections)
     for d in all_detections:
         if track_ids[0] in d:
             p1_detections.append(d[track_ids[0]])

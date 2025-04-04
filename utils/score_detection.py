@@ -11,6 +11,7 @@ def get_user_selected_roi(frame):
     score_box_coords = cv2.selectROI("Select Scoreboard ROI", frame, fromCenter=False, showCrosshair=True)
     
     cv2.destroyAllWindows()
+    return score_box_coords
 
 # Function to detect the score from the scoreboard
 def detect_score(frame):

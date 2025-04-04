@@ -13,6 +13,7 @@ from trackers import PlayerTracker
 import numpy as np
 
 def process_video(video_path):
+    os.environ['TESSDATA_PREFIX'] = '/HOME/anagireddygari/tessdata'
     print('Opening Video')
     base_name = os.path.basename(video_path)
     file_name, _ = os.path.splitext(base_name)

@@ -19,7 +19,7 @@ class PlayerTracker:
             return []
 
         if len(self.main_ids) < 2:
-            chosen_players = self.choose_players(court_keypoints, player_detections[0])
+            chosen_players = self.choose_players(court_keypoints, player_detections[-1])
             self.main_ids = list(chosen_players.keys())
             return [chosen_players]
         
@@ -149,3 +149,5 @@ class PlayerTracker:
             output_video_frames.append(frame)
 
         return output_video_frames
+
+       

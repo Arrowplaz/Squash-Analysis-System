@@ -53,7 +53,7 @@ def process_video(video_path, scoreboard_points, gender):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
+    # out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
 
     os.makedirs(detections_path, exist_ok=True)
 
@@ -67,8 +67,8 @@ def process_video(video_path, scoreboard_points, gender):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            if frame_idx == 5000:
-                break
+            # if frame_idx == 5000:
+            #     break
             ret, frame = cap.read()
             if not ret:
                 break
@@ -80,35 +80,35 @@ def process_video(video_path, scoreboard_points, gender):
             player_detections.append(detections)
             filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
             player_detections = filtered_detections
-            output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
-            out.write(output_frame)  # Write frame directly to video
+            # output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
+            # out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            # player1_score, player2_score = detect_score(frame)
-            # player1_score, player2_score = int(player1_score), int(player2_score)
+            player1_score, player2_score = detect_score(frame)
+            player1_score, player2_score = int(player1_score), int(player2_score)
 
-            # if player1_score is not None and player2_score is not None:
-            #     print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
-            #     if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
-            #         point_winner = None
-            #         if player1_score != prev_p1_score and player1_score > prev_p1_score:
-            #             point_winner = 'Player 1'
-            #         elif player2_score != prev_p2_score and player2_score > prev_p2_score:
-            #             point_winner = 'Player 2'
+            if player1_score is not None and player2_score is not None:
+                print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+                if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+                    point_winner = None
+                    if player1_score != prev_p1_score and player1_score > prev_p1_score:
+                        point_winner = 'Player 1'
+                    elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+                        point_winner = 'Player 2'
 
-            #         # Append score detection only when there is a change
-            #         score_detections.append({
-            #             'frame_idx': frame_idx,
-            #             'player1_score': player1_score,
-            #             'player2_score': player2_score,
-            #             'point_winner': point_winner
-            #         })
-            #         print(f"Point Winner: {point_winner}")
+                    # Append score detection only when there is a change
+                    score_detections.append({
+                        'frame_idx': frame_idx,
+                        'player1_score': player1_score,
+                        'player2_score': player2_score,
+                        'point_winner': point_winner
+                    })
+                    print(f"Point Winner: {point_winner}")
 
-            #         # Update previous scores
-            #         prev_p1_score = player1_score
-            #         prev_p2_score = player2_score
-            #         last_winner = point_winner
+                    # Update previous scores
+                    prev_p1_score = player1_score
+                    prev_p2_score = player2_score
+                    last_winner = point_winner
             # Periodically save detections to disk and free memory
 
             if frame_idx % chunk_size == 0 and frame_idx > 0:
@@ -190,8 +190,8 @@ def process_video(video_path, scoreboard_points, gender):
 
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
-    # insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
-                #  video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections, gender)
+    insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
+                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections, gender)
 
     print("Uploaded to Mongo")
 

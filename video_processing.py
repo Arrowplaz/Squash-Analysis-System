@@ -84,31 +84,31 @@ def process_video(video_path, scoreboard_points, gender):
             out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            player1_score, player2_score = detect_score(frame)
-            player1_score, player2_score = int(player1_score), int(player2_score)
+            # player1_score, player2_score = detect_score(frame)
+            # player1_score, player2_score = int(player1_score), int(player2_score)
 
-            if player1_score is not None and player2_score is not None:
-                print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
-                if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
-                    point_winner = None
-                    if player1_score != prev_p1_score and player1_score > prev_p1_score:
-                        point_winner = 'Player 1'
-                    elif player2_score != prev_p2_score and player2_score > prev_p2_score:
-                        point_winner = 'Player 2'
+            # if player1_score is not None and player2_score is not None:
+            #     print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+            #     if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+            #         point_winner = None
+            #         if player1_score != prev_p1_score and player1_score > prev_p1_score:
+            #             point_winner = 'Player 1'
+            #         elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+            #             point_winner = 'Player 2'
 
-                    # Append score detection only when there is a change
-                    score_detections.append({
-                        'frame_idx': frame_idx,
-                        'player1_score': player1_score,
-                        'player2_score': player2_score,
-                        'point_winner': point_winner
-                    })
-                    print(f"Point Winner: {point_winner}")
+            #         # Append score detection only when there is a change
+            #         score_detections.append({
+            #             'frame_idx': frame_idx,
+            #             'player1_score': player1_score,
+            #             'player2_score': player2_score,
+            #             'point_winner': point_winner
+            #         })
+            #         print(f"Point Winner: {point_winner}")
 
-                    # Update previous scores
-                    prev_p1_score = player1_score
-                    prev_p2_score = player2_score
-                    last_winner = point_winner
+            #         # Update previous scores
+            #         prev_p1_score = player1_score
+            #         prev_p2_score = player2_score
+            #         last_winner = point_winner
             # Periodically save detections to disk and free memory
 
             if frame_idx % chunk_size == 0 and frame_idx > 0:

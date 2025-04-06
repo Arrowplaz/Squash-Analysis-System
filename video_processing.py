@@ -84,31 +84,31 @@ def process_video(video_path, scoreboard_points, gender):
             # out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            player1_score, player2_score = detect_score(frame)
-            player1_score, player2_score = int(player1_score), int(player2_score)
+            # player1_score, player2_score = detect_score(frame)
+            # player1_score, player2_score = int(player1_score), int(player2_score)
 
-            if player1_score is not None and player2_score is not None:
-                print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
-                if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
-                    point_winner = None
-                    if player1_score != prev_p1_score and player1_score > prev_p1_score:
-                        point_winner = 'Player 1'
-                    elif player2_score != prev_p2_score and player2_score > prev_p2_score:
-                        point_winner = 'Player 2'
+            # if player1_score is not None and player2_score is not None:
+            #     print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+            #     if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+            #         point_winner = None
+            #         if player1_score != prev_p1_score and player1_score > prev_p1_score:
+            #             point_winner = 'Player 1'
+            #         elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+            #             point_winner = 'Player 2'
 
-                    # Append score detection only when there is a change
-                    score_detections.append({
-                        'frame_idx': frame_idx,
-                        'player1_score': player1_score,
-                        'player2_score': player2_score,
-                        'point_winner': point_winner
-                    })
-                    print(f"Point Winner: {point_winner}")
+            #         # Append score detection only when there is a change
+            #         score_detections.append({
+            #             'frame_idx': frame_idx,
+            #             'player1_score': player1_score,
+            #             'player2_score': player2_score,
+            #             'point_winner': point_winner
+            #         })
+            #         print(f"Point Winner: {point_winner}")
 
-                    # Update previous scores
-                    prev_p1_score = player1_score
-                    prev_p2_score = player2_score
-                    last_winner = point_winner
+            #         # Update previous scores
+            #         prev_p1_score = player1_score
+            #         prev_p2_score = player2_score
+            #         last_winner = point_winner
             # Periodically save detections to disk and free memory
 
             if frame_idx % chunk_size == 0 and frame_idx > 0:
@@ -206,15 +206,15 @@ def process_video(video_path, scoreboard_points, gender):
 
 
 if __name__ == '__main__':
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88], 'M')
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4", [1106, 958, 38, 83], 'M')
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4", [1064, 957, 38, 84], 'M')
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4", [1106, 957, 35, 84], 'M')
-    # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
-    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
-    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
-    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game2_College.mp4", [1106, 958, 38, 83], 'M')
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game1_College.mp4", [1064, 957, 38, 84], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4", [1106, 957, 35, 84], 'M')
+    process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
+    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
     process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
     process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
     process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')

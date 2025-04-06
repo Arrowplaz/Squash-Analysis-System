@@ -213,8 +213,8 @@ if __name__ == '__main__':
     # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game2_College.mp4", [1106, 957, 35, 84], 'M')
     # process_video("./input_videos/Omar_Hafez_V_Lachlan_Sutton_#US_Game3_College.mp4", [1144, 954, 38, 90], 'M')
     # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
-    process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
+    # process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game3_College.mp4', [1144, 954, 38, 90], 'F')
     process_video('./input_videos/Jana_Safy_V_Caroline_Fouts_#US_Game4_College.mp4', [1185, 957, 39, 83], 'F')
     process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game1_College.mp4', [1064, 954, 37, 88], 'F')
     process_video('./input_videos/Malak_Ashraf_Kamal_V_Saran_Nghiem_#US_Game2_College.mp4', [1106, 958, 38, 83], 'F')
@@ -229,5 +229,5 @@ if __name__ == '__main__':
 
 
    
-    
+
     

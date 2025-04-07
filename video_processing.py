@@ -36,7 +36,8 @@ def process_video(video_path, scoreboard_points, gender):
 
     print('Detecting Court Keypoints')
     #court_keypoints = get_user_selected_points(first_frame)
-    court_keypoints = [709, 536, 1268, 536, 575, 871, 1405, 874]
+ 
+    court_keypoints = [453, 636, 1316, 623, 337, 948, 1530, 925]
 
     # print('Select Scoreboard')
     scoreboard_keypoints = get_user_selected_roi(first_frame, scoreboard_points)
@@ -206,12 +207,17 @@ def process_video(video_path, scoreboard_points, gender):
 
 
 if __name__ == '__main__':
-    process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game1_Pro.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game2_Pro.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game3_Pro.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game1_Pro.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game2_Pro.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game3_Pro.mp4", [1064, 954, 37, 88], 'M')
+    
+    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game1_Junior.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game2_Junior.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game3_Junior.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game4_Junior.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game5_Junior.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game1_Junior.mp4", [1064, 954, 37, 88], 'F')
+    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game2_Junior.mp4", [1064, 954, 37, 88], 'F')
+    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game3_Junior.mp4", [1064, 954, 37, 88], 'F')
+    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game4_Junior.mp4", [1064, 954, 37, 88], 'F')
+    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game5_Junior.mp4", [1064, 954, 37, 88], 'F')
     
 
 

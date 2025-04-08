@@ -35,7 +35,9 @@ def process_video(video_path, scoreboard_points, gender):
         return
 
     print('Detecting Court Keypoints')
-    #court_keypoints = get_user_selected_points(first_frame)
+    court_keypoints = get_user_selected_points(first_frame)
+    print(court_keypoints)
+    return
  
     court_keypoints = [453, 636, 1316, 623, 337, 948, 1530, 925]
 
@@ -208,16 +210,14 @@ def process_video(video_path, scoreboard_points, gender):
 
 if __name__ == '__main__':
     
-    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game1_Junior.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game2_Junior.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game3_Junior.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game4_Junior.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game5_Junior.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game1_Junior.mp4", [1064, 954, 37, 88], 'F')
-    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game2_Junior.mp4", [1064, 954, 37, 88], 'F')
-    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game3_Junior.mp4", [1064, 954, 37, 88], 'F')
-    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game4_Junior.mp4", [1064, 954, 37, 88], 'F')
-    process_video("./input_videos/Janna_Galal_V_Nadien_ElHammamy_#UK_Game5_Junior.mp4", [1064, 954, 37, 88], 'F')
+    process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canda_Game1.mp4", [1064, 954, 37, 88], 'M')
+    # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canda_Game2.mp4", [1064, 954, 37, 88], 'M')
+    # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canda_Game3.mp4", [1064, 954, 37, 88], 'M')
+    # process_video("./input_videos/Daniel_Poleschuck_V_Karim_El_Torkey_#Canda_Game1.mp4", [1064, 954, 37, 88], 'M')
+    # process_video("./input_videos/Daniel_Poleschuck_V_Karim_El_Torkey_#Canda_Game2.mp4", [1064, 954, 37, 88], 'M')
+    # process_video("./input_videos/Daniel_Poleschuck_V_Karim_El_Torkey_#Canda_Game3.mp4", [1064, 954, 37, 88], 'M')
+
+   
     
 
 

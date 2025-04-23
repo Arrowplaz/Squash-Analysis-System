@@ -22,21 +22,21 @@ class PlayerTracker:
         latest_detection = player_detections[-1]
 
         if len(self.main_ids) < 2:
-            chosen_players = self.choose_players(court_keypoints, player_detections[-1])
+            chosen_players = self.choose_players(court_keypoints, latest_detection)
             self.main_ids = list(chosen_players.keys())
             self.previous_shirt_colors = {pid: latest_detection[pid]["shirt_color"] for pid in self.main_ids}
             return [{pid: latest_detection[pid]["bbox"] for pid in self.main_ids}]
         
         main_ids = self.main_ids
-        chosen_players = self.choose_players(court_keypoints, player_detections[-1])
+        chosen_players = self.choose_players(court_keypoints, latest_detection)
 
         filtered_player_dict = {}
         remaining_ids = main_ids.copy()
 
             
-        for track_id in filtered_player_dict:
-            bbox = filtered_player_dict['bbox']
-            shirt_color = filtered_player_dict['shirt_color']
+        for track_id, items in chosen_players.items():
+            bbox = items[0]
+            shirt_color = items[1]
 
             best_match_id = None
             best_color_dist = float("inf")
@@ -76,7 +76,10 @@ class PlayerTracker:
         court_center = (court_center_x, court_center_y)
 
         # Go through all detections in the current frame
-        for track_id, bbox, shirt_color in player_dict.items():
+        for track_id, items in player_dict.items():
+            bbox = items[0]
+            shirt_color = items[1]
+
             player_center = get_center_of_bbox(bbox)
 
             # Calculate distance from the player's center to the court center

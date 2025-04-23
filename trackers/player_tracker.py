@@ -51,11 +51,11 @@ class PlayerTracker:
                     best_match_id = ref_id
                 
                 if best_match_id is not None:
-                    filtered_player_dict[best_match_id] = player_info["bbox"]
+                    filtered_player_dict[best_match_id] = bbox
                     remaining_ids.remove(best_match_id)
             
         
-        player_detections[-1] = {pid: bbox for pid, bbox in filtered_player_dict.items()}
+        player_detections[-1] = filtered_player_dict
         return player_detections
 
        

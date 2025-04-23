@@ -3,9 +3,9 @@ import cv2
 import pickle
 import sys
 import os
+import numpy as np
 sys.path.append("../")
 from utils import get_center_of_bbox, measure_distance
-import numpy as np
 
 class PlayerTracker:
 
@@ -24,56 +24,46 @@ class PlayerTracker:
         if len(self.main_ids) < 2:
             chosen_players = self.choose_players(court_keypoints, latest_detection)
             self.main_ids = list(chosen_players.keys())
-            self.previous_shirt_colors = {pid: chosen_players[pid]['shirt_color'] for pid in self.main_ids}
-            self.previous_player_dict = {pid: chosen_players[pid] for pid in self.main_ids}
-            return [{pid: chosen_players[pid]['bbox'] for pid in self.main_ids}]
+            self.previous_shirt_colors = {pid: latest_detection[pid]["shirt_color"] for pid in self.main_ids}
+            player_detections[-1] = {pid: latest_detection[pid]["bbox"] for pid in self.main_ids}
+            return player_detections
 
-        # Upgrade: Match players based on motion + color
-        matched_players = self.match_players_by_motion_and_color(
-            self.previous_player_dict, latest_detection)
+        current_ids = set(latest_detection.keys())
+        missing_ids = [pid for pid in self.main_ids if pid not in current_ids]
+        new_ids = [pid for pid in current_ids if pid not in self.main_ids]
 
-        # Update previous for next frame
-        self.previous_player_dict = matched_players
-        self.previous_shirt_colors = {pid: matched_players[pid]['shirt_color'] for pid in matched_players}
+        if missing_ids or new_ids:
+            main_ids = self.main_ids
+            chosen_players = self.choose_players(court_keypoints, latest_detection)
 
-        player_detections[-1] = {pid: info['bbox'] for pid, info in matched_players.items()}
+            filtered_player_dict = {}
+            remaining_ids = main_ids.copy()
+
+            for track_id, items in chosen_players.items():
+                bbox = items['bbox']
+                shirt_color = items['shirt_color']
+
+                best_match_id = None
+                best_color_dist = float("inf")
+
+                for ref_id in remaining_ids:
+                    ref_color = self.previous_shirt_colors.get(ref_id, (0, 0, 0))
+                    dist = self.color_distance(ref_color, shirt_color)
+
+                    if dist < best_color_dist:
+                        best_color_dist = dist
+                        best_match_id = ref_id
+
+                if best_match_id is not None:
+                    filtered_player_dict[best_match_id] = bbox
+                    remaining_ids.remove(best_match_id)
+
+            player_detections[-1] = filtered_player_dict
+        else:
+            filtered_player_dict = {pid: latest_detection[pid]["bbox"] for pid in self.main_ids if pid in latest_detection}
+            player_detections[-1] = filtered_player_dict
+
         return player_detections
-
-    def match_players_by_motion_and_color(self, previous_players, current_detections, max_distance=150, color_weight=0.4):
-        if not previous_players:
-            return current_detections
-
-        matched_players = {}
-        unmatched_detections = set(current_detections.keys())
-
-        for prev_id, prev_info in previous_players.items():
-            best_score = float('inf')
-            best_detection = None
-
-            prev_center = get_center_of_bbox(prev_info['bbox'])
-            prev_color = np.array(prev_info['shirt_color'])
-
-            for det_id in unmatched_detections:
-                det_info = current_detections[det_id]
-                det_center = get_center_of_bbox(det_info['bbox'])
-                det_color = np.array(det_info['shirt_color'])
-
-                motion_dist = measure_distance(prev_center, det_center)
-                if motion_dist > max_distance:
-                    continue
-
-                color_diff = np.linalg.norm(prev_color - det_color)
-                score = (1 - color_weight) * motion_dist + color_weight * color_diff
-
-                if score < best_score:
-                    best_score = score
-                    best_detection = det_id
-
-            if best_detection is not None:
-                matched_players[prev_id] = current_detections[best_detection]
-                unmatched_detections.remove(best_detection)
-
-        return matched_players
 
     def color_distance(self, color1, color2):
         color1 = np.array(color1)
@@ -93,15 +83,14 @@ class PlayerTracker:
         for track_id, items in player_dict.items():
             bbox = items['bbox']
             shirt_color = items['shirt_color']
-
             player_center = get_center_of_bbox(bbox)
             distance = measure_distance(player_center, court_center)
-
             distances.append((track_id, bbox, shirt_color, distance))
 
         distances.sort(key=lambda x: x[3])
 
         chosen_players = {}
+
         for i in range(min(2, len(distances))):
             chosen_players[distances[i][0]] = {"bbox": distances[i][1], "shirt_color": distances[i][2]}
 

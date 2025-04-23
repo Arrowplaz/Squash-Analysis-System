@@ -205,7 +205,7 @@ def process_video(video_path, scoreboard_points, gender):
 
 if __name__ == '__main__':
     # process_video("./input_videos/real.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Alexander_Dartnell_V_Eiad_Daoud_#UK_Game5_Junior.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game2_Pro.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game3_Pro.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game1_Pro.mp4", [1064, 954, 37, 88], 'M')

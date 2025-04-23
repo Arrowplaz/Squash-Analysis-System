@@ -34,7 +34,6 @@ def process_video(video_path, scoreboard_points, gender):
 
     print('Detecting Court Keypoints')
     court_keypoints = get_user_selected_points(first_frame)
-    return
     # court_keypoints = [693, 416, 1185, 412, 257, 749, 1613, 730]
 
     # print('Select Scoreboard')
@@ -205,8 +204,8 @@ def process_video(video_path, scoreboard_points, gender):
 
 
 if __name__ == '__main__':
-    process_video("./input_videos/real.mp4", [1064, 954, 37, 88], 'M')
-    # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game1_Pro.mp4", [1064, 954, 37, 88], 'M')
+    # process_video("./input_videos/real.mp4", [1064, 954, 37, 88], 'M')
+    process_video("Alexander_Dartnell_V_Eiad_Daoud_#UK_Game5_Junior.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game2_Pro.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game3_Pro.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game1_Pro.mp4", [1064, 954, 37, 88], 'M')

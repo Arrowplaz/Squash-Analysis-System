@@ -12,16 +12,20 @@ class PlayerTracker:
         self.model = YOLO(model_path)
         self.previous_player_dict = {}
         self.main_ids = []
+        self.previous_shirt_colors = {}
 
     
     def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:  
             return []
 
+        latest_detection = player_detections[-1]
+
         if len(self.main_ids) < 2:
             chosen_players = self.choose_players(court_keypoints, player_detections[-1])
             self.main_ids = list(chosen_players.keys())
-            return [chosen_players]
+            self.previous_shirt_colors = {pid: latest_detection[pid]["shirt_color"] for pid in self.main_ids}
+            return [{pid: latest_detection[pid]["bbox"] for pid in self.main_ids}]
         
         main_ids = self.main_ids
         chosen_players = self.choose_players(court_keypoints, player_detections[-1])
@@ -29,22 +33,35 @@ class PlayerTracker:
         filtered_player_dict = {}
         remaining_ids = main_ids.copy()
 
-        for track_id, bbox in chosen_players.items():
-            if track_id in main_ids:
-                filtered_player_dict[track_id] = bbox
-                remaining_ids.remove(track_id)
+            
+        for track_id in filtered_player_dict:
+            bbox = filtered_player_dict['bbox']
+            shirt_color = filtered_player_dict['shirt_color']
 
-        # Assign new detections to remaining IDs if needed
-        for track_id, bbox in chosen_players.items():
-            if not remaining_ids:  
-                break
-            if track_id not in main_ids:
-                filtered_player_dict[remaining_ids.pop(0)] = bbox
+            best_match_id = None
+            best_color_dist = float("inf")
+
+            for ref_id in remaining_ids:
+                ref_color = self.previous_shirt_colors.get(ref_id, (0,0,0))
+                dist = self.color_distance(ref_color, shirt_color)
+
+                if dist < best_color_dist:
+                    best_color_dist = dist
+                    best_match_id = ref_id
+                
+                if best_match_id is not None:
+                    filtered_player_dict[best_match_id] = player_info["bbox"]
+                    remaining_ids.remove(best_match_id)
+            
         
-        player_detections[-1] = filtered_player_dict 
+        player_detections[-1] = {pid: bbox for pid, bbox in filtered_player_dict.items()}
         return player_detections
 
        
+    def color_distance(self, color1, color2):
+        color1 = np.array(color1)
+        color2 = np.array(color2)
+        return np.linalg.norm(color1 - color2)
 
     def choose_players(self, court_keypoints, player_dict):
         distances = []
@@ -59,22 +76,22 @@ class PlayerTracker:
         court_center = (court_center_x, court_center_y)
 
         # Go through all detections in the current frame
-        for track_id, bbox in player_dict.items():
+        for track_id, bbox, shirt_color in player_dict.items():
             player_center = get_center_of_bbox(bbox)
 
             # Calculate distance from the player's center to the court center
             distance = measure_distance(player_center, court_center)
 
-            distances.append((track_id, bbox, distance))
+            distances.append((track_id, bbox, shirt_color, distance))
 
         # Sort by minimum distance to the court keypoints
-        distances.sort(key=lambda x: x[2])
+        distances.sort(key=lambda x: x[3])
 
         chosen_players = {}
 
         #Grab the track_id and b
         for i in range(min(2, len(distances))):
-            chosen_players[distances[i][0]] = distances[i][1]
+            chosen_players[distances[i][0]] = {"bbox":distances[i][1], "shirt_color":distances[i][2]}
 
 
         return chosen_players
@@ -117,9 +134,27 @@ class PlayerTracker:
             object_cls_id = box.cls.tolist()[0]
             object_cls_name = id_name_dict[object_cls_id]
             if object_cls_name == "person":
-                player_dict[track_id] = result
+                shirt_color = self.extract_shirt_color(frame, result)
+                player_dict[track_id] = {"bbox": result, "shirt_color": shirt_color}
         
         return player_dict
+
+
+    def extract_shirt_color(frame, bbox):
+        x1, y1, x2, y2 = map(int, bbox)
+        width = x2 - x1
+        height = y2 - y1
+
+        shirt_region = frame[y1:y1 + height // 2, x1:x2]
+
+        if shirt_region.size == 0:
+            return (0, 0, 0)  
+
+        shirt_region_small = cv2.resize(shirt_region, (20, 20))
+
+        avg_color = shirt_region_small.mean(axis=0).mean(axis=0) 
+
+        return tuple(map(int, avg_color))  # (B, G, R)
 
     def draw_bbox(self, frame, player_detection):
         for track_id, bbox in player_detection.items():

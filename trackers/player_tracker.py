@@ -14,6 +14,8 @@ class PlayerTracker:
         self.previous_player_dict = {}
         self.main_ids = []
         self.previous_shirt_colors = {}
+        self.color_history = {}
+        self.history_length = 5
 
     def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:
@@ -25,44 +27,22 @@ class PlayerTracker:
             chosen_players = self.choose_players(court_keypoints, latest_detection)
             self.main_ids = list(chosen_players.keys())
             self.previous_shirt_colors = {pid: latest_detection[pid]["shirt_color"] for pid in self.main_ids}
+            self.color_history = {pid: [latest_detection[pid]["shirt_color"]] for pid in self.main_ids}
             player_detections[-1] = {pid: latest_detection[pid]["bbox"] for pid in self.main_ids}
             return player_detections
 
-        current_ids = set(latest_detection.keys())
-        missing_ids = [pid for pid in self.main_ids if pid not in current_ids]
-        new_ids = [pid for pid in current_ids if pid not in self.main_ids]
+        filtered_player_dict = {}
+        for pid in self.main_ids:
+            if pid in latest_detection:
+                current_color = latest_detection[pid]["shirt_color"]
+                self.color_history.setdefault(pid, []).append(current_color)
+                if len(self.color_history[pid]) > self.history_length:
+                    self.color_history[pid].pop(0)
+                avg_color = tuple(np.mean(self.color_history[pid], axis=0).astype(int))
+                self.previous_shirt_colors[pid] = avg_color
+                filtered_player_dict[pid] = latest_detection[pid]["bbox"]
 
-        if missing_ids or new_ids:
-            main_ids = self.main_ids
-            chosen_players = self.choose_players(court_keypoints, latest_detection)
-
-            filtered_player_dict = {}
-            remaining_ids = main_ids.copy()
-
-            for track_id, items in chosen_players.items():
-                bbox = items['bbox']
-                shirt_color = items['shirt_color']
-
-                best_match_id = None
-                best_color_dist = float("inf")
-
-                for ref_id in remaining_ids:
-                    ref_color = self.previous_shirt_colors.get(ref_id, (0, 0, 0))
-                    dist = self.color_distance(ref_color, shirt_color)
-
-                    if dist < best_color_dist:
-                        best_color_dist = dist
-                        best_match_id = ref_id
-
-                if best_match_id is not None:
-                    filtered_player_dict[best_match_id] = bbox
-                    remaining_ids.remove(best_match_id)
-
-            player_detections[-1] = filtered_player_dict
-        else:
-            filtered_player_dict = {pid: latest_detection[pid]["bbox"] for pid in self.main_ids if pid in latest_detection}
-            player_detections[-1] = filtered_player_dict
-
+        player_detections[-1] = filtered_player_dict
         return player_detections
 
     def color_distance(self, color1, color2):

@@ -5,6 +5,7 @@ import sys
 import os
 sys.path.append("../")
 from utils import get_center_of_bbox, measure_distance
+import numpy as np
 
 class PlayerTracker:
     

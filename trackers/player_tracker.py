@@ -35,8 +35,8 @@ class PlayerTracker:
 
             
         for track_id, items in chosen_players.items():
-            bbox = items[0]
-            shirt_color = items[1]
+            bbox = items['bbox']
+            shirt_color = items['shirt_color']
 
             best_match_id = None
             best_color_dist = float("inf")
@@ -77,8 +77,8 @@ class PlayerTracker:
 
         # Go through all detections in the current frame
         for track_id, items in player_dict.items():
-            bbox = items[0]
-            shirt_color = items[1]
+            bbox = items['bbox']
+            shirt_color = items['shirt_color']
 
             player_center = get_center_of_bbox(bbox)
 

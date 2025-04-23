@@ -140,7 +140,7 @@ class PlayerTracker:
         return player_dict
 
 
-    def extract_shirt_color(frame, bbox):
+    def extract_shirt_color(self, frame, bbox):
         x1, y1, x2, y2 = map(int, bbox)
         width = x2 - x1
         height = y2 - y1

@@ -5,6 +5,7 @@ import sys
 import os
 import numpy as np
 sys.path.append("../")
+from shapely.geometry import Point, Polygon
 from utils import get_center_of_bbox, measure_distance
 
 class PlayerTracker:
@@ -63,17 +64,18 @@ class PlayerTracker:
         player_detections[-1] = filtered_player_dict
         return player_detections
 
-    def color_distance(self, color1, color2):
-        color1 = np.array(color1)
-        color2 = np.array(color2)
-        return np.linalg.norm(color1 - color2)
-
     def choose_players(self, court_keypoints, player_dict):
         distances = []
 
         if not player_dict:
             return {}
 
+        # Build a polygon from court keypoints
+        # Assuming court_keypoints = [x1, y1, x2, y2, x3, y3, ...]
+        court_points = [(court_keypoints[i], court_keypoints[i+1]) for i in range(0, len(court_keypoints), 2)]
+        court_polygon = Polygon(court_points)
+
+        # Compute court center
         court_center_x = (court_keypoints[0] + court_keypoints[2]) / 2
         court_center_y = (court_keypoints[1] + court_keypoints[5]) / 2
         court_center = (court_center_x, court_center_y)
@@ -82,15 +84,20 @@ class PlayerTracker:
             bbox = items['bbox']
             shirt_color = items['shirt_color']
             player_center = get_center_of_bbox(bbox)
-            distance = measure_distance(player_center, court_center)
-            distances.append((track_id, bbox, shirt_color, distance))
+            point = Point(player_center)
 
+            # Check if player center is inside the court
+            if court_polygon.contains(point):
+                distance = measure_distance(player_center, court_center)
+                distances.append((track_id, bbox, shirt_color, distance))
+
+        # Sort by distance
         distances.sort(key=lambda x: x[3])
 
         chosen_players = {}
 
-        for i in range(min(2, len(distances))):
-            chosen_players[distances[i][0]] = {"bbox": distances[i][1], "shirt_color": distances[i][2]}
+        for track_id, bbox, shirt_color, _ in distances[:2]:
+            chosen_players[track_id] = {"bbox": bbox, "shirt_color": shirt_color}
 
         return chosen_players
 

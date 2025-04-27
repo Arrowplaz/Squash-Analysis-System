@@ -58,6 +58,7 @@ def process_video(video_path, scoreboard_points, gender):
 
     os.makedirs(detections_path, exist_ok=True)
 
+    looking_for_score = True
     player_detections = []
     score_detections = []  # List to store score detections
     prev_p1_score = -1
@@ -79,38 +80,44 @@ def process_video(video_path, scoreboard_points, gender):
             # Process and track players
             detections = player_tracker.detect_frame(frame)
             player_detections.append(detections)
-            filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
+            filtered_detections = player_tracker.choose_and_filter_players(player_detections, hull_keypoints)
             player_detections = filtered_detections
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            # player1_score, player2_score = detect_score(frame)
-            # player1_score, player2_score = int(player1_score), int(player2_score)
+            if frame_idx % 100 == 0 or looking_for_score:
+                try:
+                    player1_score, player2_score = detect_score(frame)                    
+                    player1_score, player2_score = int(player1_score), int(player2_score)
 
-            # if player1_score is not None and player2_score is not None:
-            #     print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
-            #     if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
-            #         point_winner = None
-            #         if player1_score != prev_p1_score and player1_score > prev_p1_score:
-            #             point_winner = 'Player 1'
-            #         elif player2_score != prev_p2_score and player2_score > prev_p2_score:
-            #             point_winner = 'Player 2'
+                    if player1_score is not None and player2_score is not None:
+                        print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+                        if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+                            point_winner = None
+                            if player1_score != prev_p1_score and player1_score > prev_p1_score:
+                                point_winner = 'Player 1'
+                            elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+                                point_winner = 'Player 2'
 
-            #         # Append score detection only when there is a change
-            #         score_detections.append({
-            #             'frame_idx': frame_idx,
-            #             'player1_score': player1_score,
-            #             'player2_score': player2_score,
-            #             'point_winner': point_winner
-            #         })
-            #         print(f"Point Winner: {point_winner}")
+                            # Append score detection only when there is a change
+                            score_detections.append({
+                                'frame_idx': frame_idx,
+                                'player1_score': player1_score,
+                                'player2_score': player2_score,
+                                'point_winner': point_winner
+                            })
+                            print(f"Point Winner: {point_winner}")
 
-            #         # Update previous scores
-            #         prev_p1_score = player1_score
-            #         prev_p2_score = player2_score
-            #         last_winner = point_winner
+                            # Update previous scores
+                            prev_p1_score = player1_score
+                            prev_p2_score = player2_score
+                            last_winner = point_winner
+                            looking_for_score = False
+                    
             # Periodically save detections to disk and free memory
+                except:
+                    print("Couldnt find score, going again")
 
             if frame_idx % chunk_size == 0 and frame_idx > 0:
                 print('Saving')

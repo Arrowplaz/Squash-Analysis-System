@@ -23,25 +23,42 @@ class PlayerTracker:
 
         latest_detection = player_detections[-1]
         chosen_players = self.choose_players(court_keypoints, latest_detection)
-        
 
         if len(self.main_ids) < 2:
             self.main_ids = list(chosen_players.keys())
-            self.previous_shirt_colors = {pid: latest_detection[pid]["shirt_color"] for pid in self.main_ids}
-            self.color_history = {pid: [latest_detection[pid]["shirt_color"]] for pid in self.main_ids}
-            player_detections[-1] = {pid: latest_detection[pid]["bbox"] for pid in self.main_ids}
+            self.previous_shirt_colors = {pid: chosen_players[pid]["shirt_color"] for pid in self.main_ids}
+            self.color_history = {pid: [chosen_players[pid]["shirt_color"]] for pid in self.main_ids}
+            player_detections[-1] = {pid: chosen_players[pid]["bbox"] for pid in self.main_ids}
             return player_detections
 
         filtered_player_dict = {}
+        unmatched_pids = [pid for pid in chosen_players if pid not in self.main_ids]
+
+        # Build a mapping from new pids to existing main_ids based on color similarity
+        pid_mapping = {}
+
+        for new_pid in unmatched_pids:
+            new_color = chosen_players[new_pid]["shirt_color"]
+            distances = {main_id: np.linalg.norm(np.array(new_color) - np.array(self.previous_shirt_colors[main_id])) for main_id in self.main_ids}
+            closest_main_id = min(distances, key=distances.get)
+            pid_mapping[new_pid] = closest_main_id
+
         for pid in self.main_ids:
-            if pid in chosen_players:
-                current_color = chosen_players[pid]["shirt_color"]
+            # Either the original pid is still there, or a new pid matched to this main id
+            matched_pid = pid
+            for new_pid, assigned_main_id in pid_mapping.items():
+                if assigned_main_id == pid:
+                    matched_pid = new_pid
+                    break
+            
+            if matched_pid in chosen_players:
+                current_color = chosen_players[matched_pid]["shirt_color"]
                 self.color_history.setdefault(pid, []).append(current_color)
                 if len(self.color_history[pid]) > self.history_length:
                     self.color_history[pid].pop(0)
                 avg_color = tuple(np.mean(self.color_history[pid], axis=0).astype(int))
                 self.previous_shirt_colors[pid] = avg_color
-                filtered_player_dict[pid] = chosen_players[pid]["bbox"]
+                filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
 
         player_detections[-1] = filtered_player_dict
         return player_detections

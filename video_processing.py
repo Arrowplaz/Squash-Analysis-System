@@ -33,8 +33,8 @@ def process_video(video_path, scoreboard_points, gender):
         return
 
     print('Detecting Court Keypoints')
-    court_keypoints = get_user_selected_points(first_frame)
-    # court_keypoints = [693, 416, 1185, 412, 257, 749, 1613, 730]
+    # court_keypoints = get_user_selected_points(first_frame)
+    court_keypoints = [693, 416, 1185, 412, 257, 749, 1613, 730]
 
     # print('Select Scoreboard')
     scoreboard_keypoints = get_user_selected_roi(first_frame, scoreboard_points)
@@ -65,7 +65,7 @@ def process_video(video_path, scoreboard_points, gender):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            if frame_idx == 3000:
+            if frame_idx == 1000:
                 break
             ret, frame = cap.read()
             if not ret:
@@ -205,7 +205,7 @@ def process_video(video_path, scoreboard_points, gender):
 
 if __name__ == '__main__':
     # process_video("./input_videos/real.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game1_College.mp4", [1064, 954, 37, 88], 'M')
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game2_Pro.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game3_Pro.mp4", [1064, 954, 37, 88], 'M')
     # process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game1_Pro.mp4", [1064, 954, 37, 88], 'M')

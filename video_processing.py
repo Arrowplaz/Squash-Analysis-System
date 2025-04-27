@@ -33,8 +33,8 @@ def process_video(video_path, scoreboard_points, gender):
         return
 
     print('Detecting Court Keypoints')
-    # court_keypoints = get_user_selected_points(first_frame)
-    court_keypoints = [693, 416, 1185, 412, 257, 749, 1613, 730]
+    court_keypoints = get_user_selected_points(first_frame)
+    # court_keypoints = [693, 416, 1185, 412, 257, 749, 1613, 730]
 
     # print('Select Scoreboard')
     scoreboard_keypoints = get_user_selected_roi(first_frame, scoreboard_points)

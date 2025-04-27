@@ -93,10 +93,14 @@ def create_heatmap(frame, court_keypoints, overlay_width=1800):
     warped_image = cv2.warpPerspective(frame, homography_matrix, (overlay_width, overlay_height))
     
     # Create an overlay canvas with padding (for drawing)
-    padding = 50
+    padding = 0
     overlay_canvas = np.zeros((overlay_height + padding, overlay_width + padding, 3), dtype=np.uint8)
     overlay_canvas = add_overlay(overlay_canvas, overlay_height, overlay_width, padding=padding)
     
+    overlay_canvas[padding:padding + overlay_height, padding:padding + overlay_width] = warped_image
+    cv2.imshow("Warped Image with Overlay", overlay_canvas)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     return warped_image, overlay_canvas, homography_matrix
 
 def map_detections(detections, homography_matrix):
@@ -133,7 +137,7 @@ def overlay_heatmap(composite, mapped_detections):
     # Accumulate intensity at detected points
     for (x, y) in mapped_detections:
         x, y = int(x), int(y)  # Ensure coordinates are integers
-        cv2.circle(heatmap, (x, y), radius=10, color=255, thickness=-1)  # Larger radius for spread
+        cv2.circle(heatmap, (x, y), radius=5, color=255, thickness=-1)  # Larger radius for spread
 
     # Apply Gaussian blur for a smoother heatmap
     heatmap = cv2.GaussianBlur(heatmap, (101, 101), 50) #Potentially make the kernal larger
@@ -150,8 +154,8 @@ def overlay_heatmap(composite, mapped_detections):
 
     # # Display the final result
     # cv2.setWindowProperty("Court with Heatmap", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    # cv2.imshow("Court with Heatmap", heatmap_overlay)
-    # cv2.waitKey(0)
+    cv2.imshow("Court with Heatmap", heatmap_overlay)
+    cv2.waitKey(0)
 
     return heatmap
 

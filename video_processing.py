@@ -86,7 +86,7 @@ def process_video(video_path, scoreboard_points, gender):
             out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            if frame_idx % 100 == 0:
+            if frame_idx % 1 == 0:
                     player1_score, player2_score = detect_score(frame)                    
                     player1_score, player2_score = int(player1_score), int(player2_score)
 

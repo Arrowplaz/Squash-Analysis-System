@@ -4,10 +4,7 @@ import cv2
 score_box_coords = []
 
 def get_user_selected_roi(frame, points):
-
     global score_box_coords
-    score_box_coords = points
-    return
     print("Select the region of interest (ROI) for the scoreboard.")
     cv2.namedWindow("Select Scoreboard ROI", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty("Select Scoreboard ROI", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)

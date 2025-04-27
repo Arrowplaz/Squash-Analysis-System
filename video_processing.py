@@ -86,8 +86,7 @@ def process_video(video_path, scoreboard_points, gender):
             out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            if frame_idx % 100 == 0 or looking_for_score:
-                try:
+            if frame_idx % 100 == 0:
                     player1_score, player2_score = detect_score(frame)                    
                     player1_score, player2_score = int(player1_score), int(player2_score)
 
@@ -116,8 +115,7 @@ def process_video(video_path, scoreboard_points, gender):
                             looking_for_score = False
                     
             # Periodically save detections to disk and free memory
-                except:
-                    print("Couldnt find score, going again")
+
 
             if frame_idx % chunk_size == 0 and frame_idx > 0:
                 print('Saving')

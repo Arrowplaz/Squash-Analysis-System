@@ -58,7 +58,6 @@ def process_video(video_path, scoreboard_points, gender):
 
     os.makedirs(detections_path, exist_ok=True)
 
-    looking_for_score = True
     player_detections = []
     score_detections = []  # List to store score detections
     prev_p1_score = -1
@@ -85,12 +84,15 @@ def process_video(video_path, scoreboard_points, gender):
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 
+            force_check = False
             #Detect scoreboard
-            if frame_idx % 100 == 0:
+            if frame_idx % 100 == 0 or force_check:
+                try:
                     player1_score, player2_score = detect_score(frame)                    
-                    player1_score, player2_score = int(player1_score), int(player2_score)
+                    
 
                     if player1_score is not None and player2_score is not None:
+                        player1_score, player2_score = int(player1_score), int(player2_score)
                         print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
                         if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
                             point_winner = None
@@ -112,7 +114,12 @@ def process_video(video_path, scoreboard_points, gender):
                             prev_p1_score = player1_score
                             prev_p2_score = player2_score
                             last_winner = point_winner
-                            looking_for_score = False
+                            force_check = False
+                    else:
+                        force_check = True
+                except:
+                    print(f"Faulty OCR detection at frame {frame_idx}. Retrying...")
+                    force_check = True
                     
             # Periodically save detections to disk and free memory
 

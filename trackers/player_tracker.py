@@ -21,6 +21,18 @@ class PlayerTracker:
         if not player_detections:
             return []
 
+        def is_overlap(bbox1, bbox2):
+            x1_min, y1_min, x1_max, y1_max = bbox1
+            x2_min, y2_min, x2_max, y2_max = bbox2
+
+            # Check if one bbox is to the left, right, above, or below the other
+            if x1_max < x2_min or x2_max < x1_min:
+                return False  # No horizontal overlap
+            if y1_max < y2_min or y2_max < y1_min:
+                return False  # No vertical overlap
+
+            return True
+
         latest_detection = player_detections[-1]
         chosen_players = self.choose_players(court_keypoints, latest_detection)
 
@@ -36,6 +48,8 @@ class PlayerTracker:
 
         pid_mapping = {}
 
+        bbox_1 = None
+        bbox_2 = None
         for new_pid in chosen_players:
             new_color = chosen_players[new_pid]["shirt_color"]
             distances = {main_id: np.linalg.norm(np.array(new_color) - np.array(self.previous_shirt_colors[main_id])) for main_id in remain_ids}
@@ -43,12 +57,21 @@ class PlayerTracker:
             remain_ids.remove(closest_main_id)
             pid_mapping[closest_main_id] = new_pid
             filtered_player_dict[closest_main_id] = chosen_players[new_pid]['bbox']
-            current_color = chosen_players[new_pid]["shirt_color"]
-            self.color_history.setdefault(closest_main_id, []).append(current_color)
-            if len(self.color_history[closest_main_id]) > self.history_length:
-                self.color_history[closest_main_id].pop(0)
-            avg_color = tuple(np.mean(self.color_history[closest_main_id], axis=0).astype(int))
-            self.previous_shirt_colors[closest_main_id] = avg_color
+            if bbox_1 is None:
+                bbox_1 = filtered_player_dict[closest_main_id]
+            else:
+                bbox_2 = filtered_player_dict[closest_main_id]
+
+        
+        if not is_overlap(bbox_1, bbox_2):
+            for pid, items in filtered_player_dict.items():
+                bbox = items['bbox']
+                shirt_color = items['shirt_color']
+                self.color_history.setdefault(pid, []).append(shirt_color)
+                if len(self.color_history[pid]) > self.history_length:
+                    self.color_history[pid].pop(0)
+                avg_color = tuple(np.mean(self.color_history[pid], axis=0).astype(int))
+                self.previous_shirt_colors[pid] = avg_color
 
         
 

@@ -76,6 +76,8 @@ class PlayerTracker:
                 # self.previous_shirt_colors[pid] = avg_color_lab
                 filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
         
+
+        print("LENGTH ", filtered_player_dict)
         if len(filtered_player_dict) == 2:
             print('hi')
 

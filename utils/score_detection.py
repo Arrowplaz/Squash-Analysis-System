@@ -5,20 +5,12 @@ score_box_coords = []
 
 def get_user_selected_roi(frame):
     global score_box_coords
-    print("Select the first region of interest (ROI) for the scoreboard.")
-    cv2.namedWindow("Select Scoreboard ROI 1", cv2.WINDOW_NORMAL)
-    cv2.setWindowProperty("Select Scoreboard ROI 1", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    roi1 = cv2.selectROI("Select Scoreboard ROI 1", frame, fromCenter=False, showCrosshair=True)
-    cv2.destroyWindow("Select Scoreboard ROI 1")
+    print("Select the region of interest (ROI) for the scoreboard.")
+    cv2.namedWindow("Select Scoreboard ROI", cv2.WINDOW_NORMAL)
+    cv2.setWindowProperty("Select Scoreboard ROI", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    score_box_coords = cv2.selectROI("Select Scoreboard ROI", frame, fromCenter=False, showCrosshair=True)
     
-    print("Select the second region of interest (ROI) for the scoreboard.")
-    cv2.namedWindow("Select Scoreboard ROI 2", cv2.WINDOW_NORMAL)
-    cv2.setWindowProperty("Select Scoreboard ROI 2", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    roi2 = cv2.selectROI("Select Scoreboard ROI 2", frame, fromCenter=False, showCrosshair=True)
-    cv2.destroyWindow("Select Scoreboard ROI 2")
-    
-    # Combine the two ROIs into one tuple or list
-    score_box_coords = (roi1, roi2)
+    cv2.destroyAllWindows()
     return score_box_coords
 
 # Function to detect the score from the scoreboard

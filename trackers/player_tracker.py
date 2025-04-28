@@ -15,107 +15,58 @@ class PlayerTracker:
         self.main_ids = []
         self.previous_shirt_colors = {}
         self.color_history = {}
-        self.history_length = 1000
+        self.history_length = 20
 
-    def choose_and_filter_players(self, player_detections, court_keypoints, bbox_threshold=10):
-        # Convert RGB color to LAB
+    def choose_and_filter_players(self, player_detections, court_keypoints):
+        if not player_detections:
+            return []
+
         def rgb_to_lab(color):
             rgb = np.array(color, dtype=np.uint8).reshape(1, 1, 3)
             lab = cv2.cvtColor(rgb, cv2.COLOR_RGB2LAB)
             return lab[0, 0]
-        
-        # Calculate center of bbox
-        def bbox_center(bbox):
-            x, y, w, h = bbox
-            return np.array([x + w/2, y + h/2])
-        
+
         latest_detection = player_detections[-1]
         chosen_players = self.choose_players(court_keypoints, latest_detection)
 
         if len(self.main_ids) < 2:
-            # Initial setup, no swapping or matching needed yet
             self.main_ids = list(chosen_players.keys())
             self.previous_shirt_colors = {pid: rgb_to_lab(chosen_players[pid]["shirt_color"]) for pid in self.main_ids}
-            self.previous_positions = {pid: bbox_center(chosen_players[pid]["bbox"]) for pid in self.main_ids}
             self.color_history = {pid: [rgb_to_lab(chosen_players[pid]["shirt_color"])] for pid in self.main_ids}
             player_detections[-1] = {pid: chosen_players[pid]["bbox"] for pid in self.main_ids}
             return player_detections
 
         filtered_player_dict = {}
-        
-        # Calculate distance between players' bbox centers
-        def calculate_distance(pid1, pid2):
-            center1 = bbox_center(chosen_players[pid1]["bbox"])
-            center2 = bbox_center(chosen_players[pid2]["bbox"])
-            return np.linalg.norm(center1 - center2)
+        color_distance_threshold = 35  # Your new setting (tight)
 
-        # Build mapping from new pids to closest main_ids based on color and position
+        # Always build fresh mapping from detections to main_ids
         pid_mapping = {}
-        assigned_ids = set()
 
         for new_pid in chosen_players:
             new_color_lab = rgb_to_lab(chosen_players[new_pid]["shirt_color"])
-            new_center = bbox_center(chosen_players[new_pid]["bbox"])
-
-            if len(pid_mapping) == 0:
-                # If no pid mapping exists, fallback to direct matching based on the closest bbox centers
-                for main_id in self.main_ids:
-                    distance = calculate_distance(new_pid, main_id)
-                    if distance < bbox_threshold:
-                        pid_mapping[new_pid] = main_id
-                        assigned_ids.add(new_pid)
-                        break
-            else:
-                # Fallback to color + position hybrid matching if bbox distance is too small
-                scores = {}
-                for main_id in self.main_ids:
-                    color_dist = np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[main_id]))
-                    pos_dist = np.linalg.norm(new_center - np.array(self.previous_positions[main_id]))
-                    total_score = color_dist + pos_dist
-                    scores[main_id] = total_score
-
-                closest_main_id = min(scores, key=scores.get)
+            distances = {
+                main_id: np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[main_id]))
+                for main_id in self.main_ids
+            }
+            closest_main_id = min(distances, key=distances.get)
+            if distances[closest_main_id] < color_distance_threshold:
                 pid_mapping[new_pid] = closest_main_id
 
-        # Assign the chosen players based on the best matching scores
+        # Now assign based on color matching
         for pid in self.main_ids:
             matched_pid = None
-            best_score = float('inf')
-
             for new_pid, assigned_main_id in pid_mapping.items():
-                if assigned_main_id == pid and new_pid not in assigned_ids:
-                    new_color_lab = rgb_to_lab(chosen_players[new_pid]["shirt_color"])
-                    new_center = bbox_center(chosen_players[new_pid]["bbox"])
-                    color_dist = np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[pid]))
-                    pos_dist = np.linalg.norm(new_center - np.array(self.previous_positions[pid]))
-                    total_score = color_dist + pos_dist
-
-                    if total_score < best_score:
-                        matched_pid = new_pid
-                        best_score = total_score
+                if assigned_main_id == pid:
+                    matched_pid = new_pid
+                    break
 
             if matched_pid is not None and matched_pid in chosen_players:
-                assigned_ids.add(matched_pid)
-
-                # Calculate distance between the matched bbox and the main player bbox
-                bbox_dist = calculate_distance(pid, matched_pid)
-
-                # If distance between bboxes is smaller than threshold, skip adding to color history
-                if bbox_dist < bbox_threshold:
-                    continue  # Skip adding to color history
-
-                # Update color history and positions for valid match
                 current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
-                current_center = bbox_center(chosen_players[matched_pid]["bbox"])
-
                 self.color_history.setdefault(pid, []).append(current_color_lab)
                 if len(self.color_history[pid]) > self.history_length:
                     self.color_history[pid].pop(0)
-
                 avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
                 self.previous_shirt_colors[pid] = avg_color_lab
-                self.previous_positions[pid] = current_center
-
                 filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
 
         player_detections[-1] = filtered_player_dict

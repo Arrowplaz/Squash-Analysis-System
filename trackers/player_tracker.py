@@ -15,7 +15,7 @@ class PlayerTracker:
         self.main_ids = []
         self.previous_shirt_colors = {}
         self.color_history = {}
-        self.history_length = 500
+        self.history_length = 20
 
     def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:
@@ -37,7 +37,7 @@ class PlayerTracker:
             return player_detections
 
         filtered_player_dict = {}
-        color_distance_threshold = 15  # Your new setting (tight)
+        color_distance_threshold = 35  # Your new setting (tight)
 
         # Always build fresh mapping from detections to main_ids
         pid_mapping = {}

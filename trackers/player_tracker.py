@@ -33,8 +33,17 @@ class PlayerTracker:
 
         filtered_player_dict = {}
 
-        # Build a mapping from new pids to existing main_ids based on color similarity
         pid_mapping = {}
+
+        # --- Check for overlap function ---
+        def is_overlap(bbox1, bbox2):
+            x1_1, y1_1, x2_1, y2_1 = bbox1
+            x1_2, y1_2, x2_2, y2_2 = bbox2
+
+            # Check for no overlap: one box is completely to the left/right or above/below the other
+            if x2_1 < x1_2 or x2_2 < x1_1 or y2_1 < y1_2 or y2_2 < y1_1:
+                return False
+            return True
 
         for new_pid in chosen_players:
             new_color = chosen_players[new_pid]["shirt_color"]
@@ -43,19 +52,32 @@ class PlayerTracker:
             pid_mapping[new_pid] = closest_main_id
 
         for pid in self.main_ids:
-            # Either the original pid is still there, or a new pid matched to this main id
             matched_pid = pid
             for new_pid, assigned_main_id in pid_mapping.items():
                 if assigned_main_id == pid:
                     matched_pid = new_pid
                     break
+
+            # --- Check for overlap before updating memory ---
+            overlap = False
+            for other_pid in self.main_ids:
+                if pid != other_pid:
+                    bbox1 = chosen_players[pid]["bbox"]
+                    bbox2 = chosen_players[other_pid]["bbox"]
+                    if is_overlap(bbox1, bbox2):
+                        overlap = True
+                        break
             
+            # If overlap detected, skip updating memory for this player
+            if overlap:
+                continue  # Skip this iteration if there's overlap
+
             if matched_pid in chosen_players:
                 current_color = chosen_players[matched_pid]["shirt_color"]
                 self.color_history.setdefault(pid, []).append(current_color)
                 if len(self.color_history[pid]) > self.history_length:
                     self.color_history[pid].pop(0)
-                avg_color = tuple(np.mean(self.color_history[pid], axis=0).astype(int))
+                avg_color = np.mean(np.array(self.color_history[pid]), axis=0)
                 self.previous_shirt_colors[pid] = avg_color
                 filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
 

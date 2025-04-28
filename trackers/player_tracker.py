@@ -79,7 +79,7 @@ class PlayerTracker:
                     break
 
             if matched_pid is not None and matched_pid in chosen_players:
-                self.previous_shirt_colors[pid] = avg_color_lab
+                
                 filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
         
 
@@ -93,6 +93,7 @@ class PlayerTracker:
                     if len(self.color_history[pid]) > self.history_length:
                         self.color_history[pid].pop(0)
                     avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
+                    self.previous_shirt_colors[pid] = avg_color_lab
 
             
 

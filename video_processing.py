@@ -223,7 +223,7 @@ def process_videos_in_folder(folder_path):
         if filename.endswith(".mp4"):
             video_path = os.path.join(folder_path, filename)
             print(f"Processing video: {video_path}")
-            process_video(video_path, roi, mode)
+            process_video(video_path)
 
 if __name__ == '__main__':
     input_folder = "./input_videos"

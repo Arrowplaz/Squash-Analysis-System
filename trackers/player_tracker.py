@@ -39,7 +39,7 @@ class PlayerTracker:
             return player_detections
 
         filtered_player_dict = {}
-        color_distance_threshold = 35  # Tuneable for LAB
+        color_distance_threshold = 15  # Tuneable for LAB
 
         # Build mapping from new_pids to closest main_ids
         pid_mapping = {}

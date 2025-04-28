@@ -34,7 +34,6 @@ def process_video(video_path):
 
     print('Detecting Court Keypoints')
     court_keypoints = get_user_selected_points(first_frame)
-    print(court_keypoints)
 
     # print('Select Scoreboard')
     scoreboard_keypoints = get_user_selected_roi(first_frame)
@@ -76,7 +75,7 @@ def process_video(video_path):
             # Process and track players
             detections = player_tracker.detect_frame(frame)
             player_detections.append(detections)
-            filtered_detections = player_tracker.choose_and_filter_players(player_detections, scoreboard_keypoints)
+            filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
             player_detections = filtered_detections
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video

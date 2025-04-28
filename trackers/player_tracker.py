@@ -15,7 +15,7 @@ class PlayerTracker:
         self.main_ids = []
         self.previous_shirt_colors = {}
         self.color_history = {}
-        self.history_length = 20
+        self.history_length = 200
 
     def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:

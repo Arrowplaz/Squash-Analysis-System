@@ -34,13 +34,9 @@ def process_video(video_path):
 
     print('Detecting Court Keypoints')
     court_keypoints = get_user_selected_points(first_frame)
-    hull_keypoints = court_keypoints
-    court_keypoints = court_keypoints[0:8]
-    print(court_keypoints)
-    # court_keypoints = [693, 416, 1185, 412, 257, 749, 1613, 730]
 
     # print('Select Scoreboard')
-    scoreboard_keypoints = get_user_selected_roi(first_frame, scoreboard_points)
+    scoreboard_keypoints = get_user_selected_roi(first_frame)
 
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')

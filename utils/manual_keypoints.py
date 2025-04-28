@@ -24,7 +24,7 @@ def get_user_selected_points(frame):
     print("Select 4 points in the order: top-left, top-right, bottom-left, bottom-right, center of T.")
     
     # Display the frame and wait for the user to select points
-    while len(court_keypoints) < 6:
+    while len(court_keypoints) < 4:
         cv2.imshow("Select Court Points", frame)
         if cv2.waitKey(1) & 0xFF == 27:  # Exit on 'Esc' key
             break

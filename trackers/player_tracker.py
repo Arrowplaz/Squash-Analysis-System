@@ -13,11 +13,10 @@ class PlayerTracker:
         self.model = YOLO(model_path)
         self.previous_player_dict = {}
         self.main_ids = []
-        self.previous_shirt_colors = {}
         self.color_history = {}
         self.history_length = 20
 
-    def choose_and_filter_players(self, player_detections, court_keypoints, bbox_threshold=50):
+    def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:
             return []
 
@@ -29,7 +28,7 @@ class PlayerTracker:
         def bbox_center(bbox):
             x, y, w, h = bbox
             return np.array([x + w/2, y + h/2])
-
+        
         def calculate_distance(pid1, pid2):
             center1 = bbox_center(chosen_players[pid1]["bbox"])
             center2 = bbox_center(chosen_players[pid2]["bbox"])
@@ -40,7 +39,6 @@ class PlayerTracker:
 
         if len(self.main_ids) < 2:
             self.main_ids = list(chosen_players.keys())
-            self.previous_shirt_colors = {pid: rgb_to_lab(chosen_players[pid]["shirt_color"]) for pid in self.main_ids}
             self.color_history = {pid: [rgb_to_lab(chosen_players[pid]["shirt_color"])] for pid in self.main_ids}
             player_detections[-1] = {pid: chosen_players[pid]["bbox"] for pid in self.main_ids}
             return player_detections
@@ -68,27 +66,15 @@ class PlayerTracker:
                     break
 
             if matched_pid is not None and matched_pid in chosen_players:
-                # Calculate the distance between the bounding boxes of the matched player and the main player
-                distance = calculate_distance(pid, matched_pid)
-
-                if distance > bbox_threshold:  # Only update color history if the bbox is far enough apart
-                    current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
-
-                    # Update color history only if the distance threshold is satisfied
-                    self.color_history.setdefault(pid, []).append(current_color_lab)
-                    if len(self.color_history[pid]) > self.history_length:
-                        self.color_history[pid].pop(0)
-
-                    # Calculate the average color and update previous color history
-                    avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
-                    self.previous_shirt_colors[pid] = avg_color_lab
-
-                    # Add the player to the filtered dictionary with their bounding box
-                    filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
+                current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
+                # self.color_history.setdefault(pid, []).append(current_color_lab)
+                # if len(self.color_history[pid]) > self.history_length:
+                #     self.color_history[pid].pop(0)
+                # avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
+                filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
 
         player_detections[-1] = filtered_player_dict
         return player_detections
-
 
 
 

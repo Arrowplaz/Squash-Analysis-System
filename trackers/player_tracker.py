@@ -17,9 +17,7 @@ class PlayerTracker:
         self.color_history = {}
         self.history_length = 15
 
-    import cv2
-import numpy as np
-
+    
 def choose_and_filter_players(self, player_detections, court_keypoints):
     if not player_detections:
         return []
@@ -40,7 +38,7 @@ def choose_and_filter_players(self, player_detections, court_keypoints):
         return player_detections
 
     filtered_player_dict = {}
-    color_distance_threshold = 35  # LAB threshold is tighter than RGB, around 30-40 is good
+    color_distance_threshold = 35  
 
     unmatched_pids = [pid for pid in chosen_players if pid not in self.main_ids]
 
@@ -62,9 +60,9 @@ def choose_and_filter_players(self, player_detections, court_keypoints):
             if best_pid is not None and best_distance < color_distance_threshold:
                 current_color_lab = rgb_to_lab(chosen_players[best_pid]["shirt_color"])
                 unmatched_pids.remove(best_pid)
-                pid = pid  # Keep mapping to original ID
+                pid = pid  
             else:
-                continue  # No good match found, skip
+                continue 
 
         self.color_history.setdefault(pid, []).append(current_color_lab)
         if len(self.color_history[pid]) > self.history_length:
@@ -75,7 +73,6 @@ def choose_and_filter_players(self, player_detections, court_keypoints):
 
     player_detections[-1] = filtered_player_dict
     return player_detections
-
 
     def color_distance(self, color1, color2):
         color1 = np.array(color1)

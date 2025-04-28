@@ -13,6 +13,7 @@ class PlayerTracker:
         self.model = YOLO(model_path)
         self.previous_player_dict = {}
         self.main_ids = []
+        self.previous_shirt_colors = {}
         self.color_history = {}
         self.history_length = 20
 
@@ -39,6 +40,7 @@ class PlayerTracker:
 
         if len(self.main_ids) < 2:
             self.main_ids = list(chosen_players.keys())
+            self.previous_shirt_colors = {pid: rgb_to_lab(chosen_players[pid]["shirt_color"]) for pid in self.main_ids}
             self.color_history = {pid: [rgb_to_lab(chosen_players[pid]["shirt_color"])] for pid in self.main_ids}
             player_detections[-1] = {pid: chosen_players[pid]["bbox"] for pid in self.main_ids}
             return player_detections
@@ -66,12 +68,16 @@ class PlayerTracker:
                     break
 
             if matched_pid is not None and matched_pid in chosen_players:
-                current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
+                # current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
                 # self.color_history.setdefault(pid, []).append(current_color_lab)
                 # if len(self.color_history[pid]) > self.history_length:
                 #     self.color_history[pid].pop(0)
                 # avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
+                # self.previous_shirt_colors[pid] = avg_color_lab
                 filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
+        
+        if len(filtered_player_dict) == 2:
+            print('hi')
 
         player_detections[-1] = filtered_player_dict
         return player_detections

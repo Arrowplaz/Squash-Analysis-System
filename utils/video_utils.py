@@ -44,13 +44,15 @@ def filename_parser(file_name):
     country = sections[idx][1:] if idx < len(sections) and sections[idx][0] == '#' else ''
     game_number = sections[idx + 1][-1] if idx + 1 < len(sections) else ''
     skill_level = sections[idx + 2] if idx + 2 < len(sections) else ''
+    gender = sections[-1]
     
     return {
         "Player 1": P1_name,
         "Player 2": P2_name,
         "Country": country,
         "Game Number": game_number,
-        "Skill Level": skill_level
+        "Skill Level": skill_level,
+        "Gender": gender
     }
 
 def main():

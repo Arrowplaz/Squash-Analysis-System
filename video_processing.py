@@ -12,7 +12,7 @@ from utils import (
 from trackers import PlayerTracker
 import numpy as np
 
-def process_video(video_path, scoreboard_points, gender):
+def process_video(video_path):
     os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
     print('Opening Video')
     base_name = os.path.basename(video_path)
@@ -204,7 +204,7 @@ def process_video(video_path, scoreboard_points, gender):
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
     insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
-                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections, gender)
+                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections, video_data['Gender'])
 
     print("Uploaded to Mongo")
 
@@ -218,14 +218,16 @@ def process_video(video_path, scoreboard_points, gender):
    
 
 
+def process_videos_in_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".mp4"):
+            video_path = os.path.join(folder_path, filename)
+            print(f"Processing video: {video_path}")
+            process_video(video_path, roi, mode)
+
 if __name__ == '__main__':
-    # process_video("./input_videos/real.mp4", [1064, 954, 37, 88], 'M')
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College.mp4", [1064, 954, 37, 88], 'M')
-    # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game2_Pro.mp4", [1064, 954, 37, 88], 'M')
-    # process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game3_Pro.mp4", [1064, 954, 37, 88], 'M')
-    # process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game1_Pro.mp4", [1064, 954, 37, 88], 'M')
-    # process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game2_Pro.mp4", [1064, 954, 37, 88], 'M')
-    # process_video("./input_videos/Daniel_Poleschuk_V_Karim_El_Torkey_#Canada_Game3_Pro.mp4", [1064, 954, 37, 88], 'M')
+    input_folder = "./input_videos"
+    process_videos_in_folder(input_folder)
     
     
 

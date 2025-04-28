@@ -181,7 +181,7 @@ class PlayerTracker:
             x1, y1, x2, y2 = bbox
             cv2.putText(frame, f"Player ID: {track_id}", (int(x1), int(y1) - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
-            if track_id == 1:
+            if track_id == self.main_ids[0]:
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 2)
             else:
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 2)

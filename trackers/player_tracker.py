@@ -15,7 +15,7 @@ class PlayerTracker:
         self.main_ids = []
         self.previous_shirt_colors = {}
         self.color_history = {}
-        self.history_length = 15
+        self.history_length = 500
 
 
 

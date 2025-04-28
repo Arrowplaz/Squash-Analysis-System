@@ -32,54 +32,41 @@ class PlayerTracker:
             return player_detections
 
         filtered_player_dict = {}
+        remain_ids = self.main_ids.copy()
 
         pid_mapping = {}
 
-        # --- Check for overlap function ---
-        def is_overlap(bbox1, bbox2):
-            x1_1, y1_1, x2_1, y2_1 = bbox1
-            x1_2, y1_2, x2_2, y2_2 = bbox2
-
-            # Check for no overlap: one box is completely to the left/right or above/below the other
-            if x2_1 < x1_2 or x2_2 < x1_1 or y2_1 < y1_2 or y2_2 < y1_1:
-                return False
-            return True
-
         for new_pid in chosen_players:
             new_color = chosen_players[new_pid]["shirt_color"]
-            distances = {main_id: np.linalg.norm(np.array(new_color) - np.array(self.previous_shirt_colors[main_id])) for main_id in self.main_ids}
+            distances = {main_id: np.linalg.norm(np.array(new_color) - np.array(self.previous_shirt_colors[main_id])) for main_id in remain_ids}
             closest_main_id = min(distances, key=distances.get)
-            pid_mapping[new_pid] = closest_main_id
+            remain_ids.remove(closest_main_id)
+            pid_mapping[closest_main_id] = new_pid
+            filtered_player_dict[closest_main_id] = chosen_players[new_pid]['bbox']
+            current_color = chosen_players[new_pid]["shirt_color"]
+            self.color_history.setdefault(closest_main_id, []).append(current_color)
+            if len(self.color_history[closest_main_id]) > self.history_length:
+                self.color_history[closest_main_id].pop(0)
+            avg_color = tuple(np.mean(self.color_history[closest_main_id], axis=0).astype(int))
+            self.previous_shirt_colors[closest_main_id] = avg_color
 
-        for pid in self.main_ids:
-            matched_pid = pid
-            for new_pid, assigned_main_id in pid_mapping.items():
-                if assigned_main_id == pid:
-                    matched_pid = new_pid
-                    break
+        
 
-            # --- Check for overlap before updating memory ---
-            overlap = False
-            for other_pid in self.main_ids:
-                if pid != other_pid:
-                    bbox1 = chosen_players[pid]["bbox"]
-                    bbox2 = chosen_players[other_pid]["bbox"]
-                    if is_overlap(bbox1, bbox2):
-                        overlap = True
-                        break
+        # for pid in self.main_ids:
+        #     matched_pid = pid
+        #     for new_pid, assigned_main_id in pid_mapping.items():
+        #         if assigned_main_id == pid:
+        #             matched_pid = new_pid
+        #             break
             
-            # If overlap detected, skip updating memory for this player
-            if overlap:
-                continue  # Skip this iteration if there's overlap
-
-            if matched_pid in chosen_players:
-                current_color = chosen_players[matched_pid]["shirt_color"]
-                self.color_history.setdefault(pid, []).append(current_color)
-                if len(self.color_history[pid]) > self.history_length:
-                    self.color_history[pid].pop(0)
-                avg_color = np.mean(np.array(self.color_history[pid]), axis=0)
-                self.previous_shirt_colors[pid] = avg_color
-                filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
+        #     if matched_pid in chosen_players:
+        #         current_color = chosen_players[matched_pid]["shirt_color"]
+        #         self.color_history.setdefault(pid, []).append(current_color)
+        #         if len(self.color_history[pid]) > self.history_length:
+        #             self.color_history[pid].pop(0)
+        #         avg_color = tuple(np.mean(self.color_history[pid], axis=0).astype(int))
+        #         self.previous_shirt_colors[pid] = avg_color
+        #         filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
 
         player_detections[-1] = filtered_player_dict
         return player_detections

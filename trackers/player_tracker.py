@@ -17,8 +17,6 @@ class PlayerTracker:
         self.color_history = {}
         self.history_length = 500
 
-
-
     def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:
             return []
@@ -39,13 +37,12 @@ class PlayerTracker:
             return player_detections
 
         filtered_player_dict = {}
-        color_distance_threshold = 15  # Tuneable for LAB
+        color_distance_threshold = 15  # Your new setting (tight)
 
-        # Build mapping from new_pids to closest main_ids
+        # Always build fresh mapping from detections to main_ids
         pid_mapping = {}
-        unmatched_pids = [pid for pid in chosen_players if pid not in self.main_ids]
 
-        for new_pid in unmatched_pids:
+        for new_pid in chosen_players:
             new_color_lab = rgb_to_lab(chosen_players[new_pid]["shirt_color"])
             distances = {
                 main_id: np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[main_id]))
@@ -55,14 +52,15 @@ class PlayerTracker:
             if distances[closest_main_id] < color_distance_threshold:
                 pid_mapping[new_pid] = closest_main_id
 
+        # Now assign based on color matching
         for pid in self.main_ids:
-            matched_pid = pid
+            matched_pid = None
             for new_pid, assigned_main_id in pid_mapping.items():
                 if assigned_main_id == pid:
                     matched_pid = new_pid
                     break
 
-            if matched_pid in chosen_players:
+            if matched_pid is not None and matched_pid in chosen_players:
                 current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
                 self.color_history.setdefault(pid, []).append(current_color_lab)
                 if len(self.color_history[pid]) > self.history_length:
@@ -73,6 +71,7 @@ class PlayerTracker:
 
         player_detections[-1] = filtered_player_dict
         return player_detections
+
 
 
     def color_distance(self, color1, color2):

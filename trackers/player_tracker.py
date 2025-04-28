@@ -24,52 +24,79 @@ class PlayerTracker:
         latest_detection = player_detections[-1]
         chosen_players = self.choose_players(court_keypoints, latest_detection)
 
+        if not chosen_players:
+            return player_detections  # No players detected
+
+        # Convert RGB shirt colors to Lab for better distance comparison
+        for pid, player in chosen_players.items():
+            rgb_color = np.uint8([[player["shirt_color"]]])  # Shape (1, 1, 3)
+            lab_color = cv2.cvtColor(rgb_color, cv2.COLOR_RGB2Lab)[0, 0]
+            chosen_players[pid]["lab_color"] = lab_color
+
         if len(self.main_ids) < 2:
-            self.main_ids = list(chosen_players.keys())
-            self.previous_shirt_colors = {pid: chosen_players[pid]["shirt_color"] for pid in self.main_ids}
-            self.color_history = {pid: [chosen_players[pid]["shirt_color"]] for pid in self.main_ids}
-            player_detections[-1] = {pid: chosen_players[pid]["bbox"] for pid in self.main_ids}
+            # Initialize IDs: 0 and 1
+            self.main_ids = [0, 1]
+            self.previous_lab_colors = {pid: chosen_players[pid]["lab_color"] for pid in list(chosen_players.keys())[:2]}
+            self.color_history = {pid: [chosen_players[pid]["lab_color"]] for pid in self.main_ids}
+            
+            # Large history
+            self.history_length = 200
+            
+            filtered_player_dict = {pid: chosen_players[player_pid]["bbox"]
+                                    for pid, player_pid in zip(self.main_ids, list(chosen_players.keys())[:2])}
+            player_detections[-1] = filtered_player_dict
             return player_detections
 
+        # --- Match new detections to main_ids based on Lab color distance ---
+        assigned_main_ids = set()
+        pid_mapping = {}  # map from chosen_players' pids to your main_ids
+
+        available_main_ids = set(self.main_ids)
+        available_pids = set(chosen_players.keys())
+
+        while available_main_ids and available_pids:
+            best_match = None
+            best_distance = float('inf')
+
+            for pid in available_pids:
+                for main_id in available_main_ids:
+                    dist = np.linalg.norm(chosen_players[pid]["lab_color"] - self.previous_lab_colors[main_id])
+                    if dist < best_distance:
+                        best_distance = dist
+                        best_match = (pid, main_id)
+
+            if best_match:
+                pid, main_id = best_match
+                pid_mapping[pid] = main_id
+                available_main_ids.remove(main_id)
+                available_pids.remove(pid)
+
+        # --- Update tracking info ---
         filtered_player_dict = {}
-        unmatched_pids = [pid for pid in chosen_players if pid not in self.main_ids]
 
-        # Build a mapping from new pids to existing main_ids based on color similarity
-        pid_mapping = {}
-
-        for new_pid in unmatched_pids:
-            new_color = chosen_players[new_pid]["shirt_color"]
-            distances = {main_id: np.linalg.norm(np.array(new_color) - np.array(self.previous_shirt_colors[main_id])) for main_id in self.main_ids}
-            closest_main_id = min(distances, key=distances.get)
-            pid_mapping[new_pid] = closest_main_id
-
-        for pid in self.main_ids:
-            # Either the original pid is still there, or a new pid matched to this main id
-            matched_pid = pid
-            for new_pid, assigned_main_id in pid_mapping.items():
-                if assigned_main_id == pid:
-                    matched_pid = new_pid
+        for main_id in self.main_ids:
+            matched_pid = None
+            for pid, assigned_id in pid_mapping.items():
+                if assigned_id == main_id:
+                    matched_pid = pid
                     break
-            
-            if matched_pid in chosen_players:
-                current_color = chosen_players[matched_pid]["shirt_color"]
-                self.color_history.setdefault(pid, []).append(current_color)
-                if len(self.color_history[pid]) > self.history_length:
-                    self.color_history[pid].pop(0)
-                avg_color = tuple(np.mean(self.color_history[pid], axis=0).astype(int))
-                self.previous_shirt_colors[pid] = avg_color
-                filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
+
+            if matched_pid is not None:
+                current_lab_color = chosen_players[matched_pid]["lab_color"]
+                self.color_history.setdefault(main_id, []).append(current_lab_color)
+
+                if len(self.color_history[main_id]) > self.history_length:
+                    self.color_history[main_id].pop(0)
+
+                # More stable averaging with large history
+                avg_lab_color = np.mean(np.stack(self.color_history[main_id]), axis=0)
+                self.previous_lab_colors[main_id] = avg_lab_color
+
+                filtered_player_dict[main_id] = chosen_players[matched_pid]["bbox"]
 
         player_detections[-1] = filtered_player_dict
         return player_detections
 
-
-
-
-    def color_distance(self, color1, color2):
-        color1 = np.array(color1)
-        color2 = np.array(color2)
-        return np.linalg.norm(color1 - color2)
 
     def choose_players(self, court_keypoints, player_dict):
         distances = []

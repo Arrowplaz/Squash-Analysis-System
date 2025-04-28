@@ -47,6 +47,8 @@ class PlayerTracker:
             return (inter_w > 0) and (inter_h > 0)
 
         latest_detection = player_detections[-1]
+
+        #Get the 2 detections closest to the center of the court
         chosen_players = self.choose_players(court_keypoints, latest_detection)
 
         if len(self.main_ids) < 2:
@@ -61,7 +63,9 @@ class PlayerTracker:
 
         pid_mapping = {}
 
+        print(len(chosen_players))
         for new_pid in chosen_players:
+            #Map each filtered pid to main_pid via color
             new_color_lab = rgb_to_lab(chosen_players[new_pid]["shirt_color"])
             distances = {
                 main_id: np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[main_id]))
@@ -70,30 +74,11 @@ class PlayerTracker:
             closest_main_id = min(distances, key=distances.get)
             if distances[closest_main_id] < color_distance_threshold:
                 pid_mapping[new_pid] = closest_main_id
-
-        for pid in self.main_ids:
-            matched_pid = None
-            for new_pid, assigned_main_id in pid_mapping.items():
-                if assigned_main_id == pid:
-                    matched_pid = new_pid
-                    break
-
-            if matched_pid is not None and matched_pid in chosen_players:
-                
-                filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
         
 
-        if len(filtered_player_dict) == 2:
-            keys = list(filtered_player_dict.keys())[0:2]
-            overlap = calculate_distance(keys[0], keys[1])
-            if not overlap:
-                for matched_pid in keys:
-                    current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
-                    self.color_history.setdefault(pid, []).append(current_color_lab)
-                    if len(self.color_history[pid]) > self.history_length:
-                        self.color_history[pid].pop(0)
-                    avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
-                    self.previous_shirt_colors[pid] = avg_color_lab
+
+
+        
 
             
 

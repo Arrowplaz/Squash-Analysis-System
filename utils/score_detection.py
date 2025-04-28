@@ -26,26 +26,23 @@ def detect_score(frame):
     # Convert to grayscale
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
 
-    # Determine split point (assuming horizontal split for two numbers)
-    split_x = w // 2
-
-    #Split into 2 sub ROIS
+    # Decide split direction
     if h > w:
         # Taller than wide: split horizontally
-        split_y = h // 2
-        player1_roi = gray[:split_y, :]  # Top half
-        player2_roi = gray[split_y:, :]  # Bottom half
+        split_line = h // 2
+        player1_roi = gray[:split_line, :]   # Top half
+        player2_roi = gray[split_line:, :]   # Bottom half
     else:
         # Wider than tall: split vertically
-        split_x = w // 2
-        player1_roi = gray[:, :split_x]  # Left half
-        player2_roi = gray[:, split_x:]  # Right half
+        split_line = w // 2
+        player1_roi = gray[:, :split_line]   # Left half
+        player2_roi = gray[:, split_line:]   # Right half
 
     # Preprocess both sub-ROIs (e.g., thresholding)
     _, player1_thresh = cv2.threshold(player1_roi, 127, 255, cv2.THRESH_BINARY_INV)
     _, player2_thresh = cv2.threshold(player2_roi, 127, 255, cv2.THRESH_BINARY_INV)
 
-    # Apply Tesseract to each sub-ROI
+    # Apply Tesseract OCR to each sub-ROI
     player1_score = pytesseract.image_to_string(player1_thresh, config='--psm 7 digits').strip()
     player2_score = pytesseract.image_to_string(player2_thresh, config='--psm 7 digits').strip()
 

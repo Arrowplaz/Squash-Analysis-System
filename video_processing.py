@@ -34,6 +34,7 @@ def process_video(video_path):
 
     print('Detecting Court Keypoints')
     court_keypoints = get_user_selected_points(first_frame)
+    print(court_keypoints)
 
     # print('Select Scoreboard')
     scoreboard_keypoints = get_user_selected_roi(first_frame)

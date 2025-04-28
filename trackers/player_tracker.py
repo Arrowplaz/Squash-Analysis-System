@@ -71,7 +71,7 @@ class PlayerTracker:
 
             closest_main_id = min(distances, key=distances.get)
             if distances[closest_main_id] < color_distance_threshold:
-                filtered_player_dict[new_pid] = closest_main_id
+                filtered_player_dict[new_pid] = chosen_players[new_pid]['bbox']
         
         
         if len(filtered_player_dict) == 2:

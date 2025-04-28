@@ -61,9 +61,6 @@ class PlayerTracker:
         filtered_player_dict = {}
         color_distance_threshold = 35  # Your new setting (tight)
 
-        pid_mapping = {}
-
-        print(len(chosen_players))
         for new_pid in chosen_players:
             #Map each filtered pid to main_pid via color
             new_color_lab = rgb_to_lab(chosen_players[new_pid]["shirt_color"])
@@ -71,12 +68,23 @@ class PlayerTracker:
                 main_id: np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[main_id]))
                 for main_id in self.main_ids
             }
+
             closest_main_id = min(distances, key=distances.get)
             if distances[closest_main_id] < color_distance_threshold:
-                pid_mapping[new_pid] = closest_main_id
+                filtered_player_dict[new_pid] = closest_main_id
         
-
-
+        
+        if len(filtered_player_dict) == 2:
+            keys = list(filtered_player_dict.keys())
+            overlap = calculate_distance(keys[0], keys[1])
+            if not overlap:
+                for key in keys:
+                    new_color_lab = rgb_to_lab(filtered_player_dict[key]["shirt_color"])
+                    if len(self.color_history) >= self.history_length:
+                        self.color_history.pop()
+                    self.color_history.setdefault(pid, []).append(current_color_lab)
+                    avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
+                    self.previous_shirt_colors[pid] = avg_color_lab
 
         
 

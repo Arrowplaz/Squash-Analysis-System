@@ -31,9 +31,20 @@ class PlayerTracker:
             return np.array([x + w/2, y + h/2])
         
         def calculate_distance(pid1, pid2):
-            center1 = bbox_center(chosen_players[pid1]["bbox"])
-            center2 = bbox_center(chosen_players[pid2]["bbox"])
-            return np.linalg.norm(center1 - center2)
+            bbox1 = chosen_players[pid1]["bbox"]
+            bbox2 = chosen_players[pid2]["bbox"]
+            x1, y1, w1, h1 = bbox1
+            x2, y2, w2, h2 = bbox2
+
+            inter_x1 = max(x1, x2)
+            inter_y1 = max(y1, y2)
+            inter_x2 = min(x1 + w1, x2 + w2)
+            inter_y2 = min(y1 + h1, y2 + h2)
+
+            inter_w = inter_x2 - inter_x1
+            inter_h = inter_y2 - inter_y1
+
+            return (inter_w > 0) and (inter_h > 0)
 
         latest_detection = player_detections[-1]
         chosen_players = self.choose_players(court_keypoints, latest_detection)
@@ -68,18 +79,22 @@ class PlayerTracker:
                     break
 
             if matched_pid is not None and matched_pid in chosen_players:
-                current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
-                self.color_history.setdefault(pid, []).append(current_color_lab)
-                if len(self.color_history[pid]) > self.history_length:
-                    self.color_history[pid].pop(0)
-                avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
                 self.previous_shirt_colors[pid] = avg_color_lab
                 filtered_player_dict[pid] = chosen_players[matched_pid]["bbox"]
         
 
-        print("LENGTH ", filtered_player_dict)
         if len(filtered_player_dict) == 2:
-            print('hi')
+            keys = list(filtered_player_dict.keys())[0:2]
+            overlap = calculate_distance(keys[0], keys[1])
+            if not overlap:
+                for matched_pid in keys:
+                    current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
+                    self.color_history.setdefault(pid, []).append(current_color_lab)
+                    if len(self.color_history[pid]) > self.history_length:
+                        self.color_history[pid].pop(0)
+                    avg_color_lab = np.mean(self.color_history[pid], axis=0).astype(int)
+
+            
 
         player_detections[-1] = filtered_player_dict
         return player_detections

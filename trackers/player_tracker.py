@@ -162,19 +162,17 @@ class PlayerTracker:
 
     def extract_shirt_color(self, frame, bbox):
         x1, y1, x2, y2 = map(int, bbox)
-        width = x2 - x1
-        height = y2 - y1
 
-        shirt_region = frame[y1:y1 + height // 2, x1:x2]
+        center_x = (x1 + x2) // 2
+        center_y = (y1 + y2) // 2
 
-        if shirt_region.size == 0:
+        if not (0 <= center_x < frame.shape[1] and 0 <= center_y < frame.shape[0]):
+            # If center is outside frame bounds, return black
             return (0, 0, 0)
 
-        shirt_region_small = cv2.resize(shirt_region, (20, 20))
+        color = frame[center_y, center_x]  # shape: (3,) -- BGR order in OpenCV
 
-        avg_color = shirt_region_small.mean(axis=0).mean(axis=0)
-
-        return tuple(map(int, avg_color))
+        return tuple(map(int, color))
 
     def draw_bbox(self, frame, player_detection):
         for track_id, bbox in player_detection.items():

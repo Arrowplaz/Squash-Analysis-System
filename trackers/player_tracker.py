@@ -17,7 +17,7 @@ class PlayerTracker:
         self.color_history = {}
         self.history_length = 1000
 
-    def choose_and_filter_players(self, player_detections, court_keypoints, bbox_threshold=50):
+    def choose_and_filter_players(self, player_detections, court_keypoints, bbox_threshold=10):
         # Convert RGB color to LAB
         def rgb_to_lab(color):
             rgb = np.array(color, dtype=np.uint8).reshape(1, 1, 3)
@@ -42,9 +42,7 @@ class PlayerTracker:
             return player_detections
 
         filtered_player_dict = {}
-        color_weight = 0.7  # How much to trust color in matching
-        position_weight = 0.3  # How much to trust position in matching
-
+        
         # Calculate distance between players' bbox centers
         def calculate_distance(pid1, pid2):
             center1 = bbox_center(chosen_players[pid1]["bbox"])
@@ -73,7 +71,7 @@ class PlayerTracker:
                 for main_id in self.main_ids:
                     color_dist = np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[main_id]))
                     pos_dist = np.linalg.norm(new_center - np.array(self.previous_positions[main_id]))
-                    total_score = color_weight * color_dist + position_weight * pos_dist
+                    total_score = color_dist + pos_dist
                     scores[main_id] = total_score
 
                 closest_main_id = min(scores, key=scores.get)
@@ -90,7 +88,7 @@ class PlayerTracker:
                     new_center = bbox_center(chosen_players[new_pid]["bbox"])
                     color_dist = np.linalg.norm(new_color_lab - np.array(self.previous_shirt_colors[pid]))
                     pos_dist = np.linalg.norm(new_center - np.array(self.previous_positions[pid]))
-                    total_score = color_weight * color_dist + position_weight * pos_dist
+                    total_score = color_dist + pos_dist
 
                     if total_score < best_score:
                         matched_pid = new_pid
@@ -99,6 +97,14 @@ class PlayerTracker:
             if matched_pid is not None and matched_pid in chosen_players:
                 assigned_ids.add(matched_pid)
 
+                # Calculate distance between the matched bbox and the main player bbox
+                bbox_dist = calculate_distance(pid, matched_pid)
+
+                # If distance between bboxes is smaller than threshold, skip adding to color history
+                if bbox_dist < bbox_threshold:
+                    continue  # Skip adding to color history
+
+                # Update color history and positions for valid match
                 current_color_lab = rgb_to_lab(chosen_players[matched_pid]["shirt_color"])
                 current_center = bbox_center(chosen_players[matched_pid]["bbox"])
 

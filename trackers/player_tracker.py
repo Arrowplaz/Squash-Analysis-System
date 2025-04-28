@@ -60,8 +60,8 @@ class PlayerTracker:
 
         
         if len(filtered_player_dict) == 2:
-            bbox_1 = filtered_player_dict[0]['bbox']
-            bbox_2 = filtered_player_dict[1]['bbox']
+            bbox_1 = filtered_player_dict[self.main_ids[0]]['bbox']
+            bbox_2 = filtered_player_dict[self.main_ids[1]]['bbox']
 
             if not is_overlap(bbox_1, bbox_2):
                 for pid in list(filtered_player_dict.keys()):

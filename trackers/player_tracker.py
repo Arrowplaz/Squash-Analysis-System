@@ -177,10 +177,7 @@ class PlayerTracker:
 
             shirt_color = self.extract_shirt_color(frame, reordered_bbox)
 
-            player_dict[track_id] = {
-                "bbox": reordered_bbox,
-                "shirt_color": shirt_color
-            }
+            player_dict[track_id] = reordered_bbox
 
         return player_dict
 

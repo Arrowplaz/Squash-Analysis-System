@@ -6,6 +6,7 @@ import os
 import numpy as np
 sys.path.append("../")
 from utils import get_center_of_bbox, measure_distance
+from deep_sort_realtime.deepsort_tracker import DeepSort
 
 class PlayerTracker:
 
@@ -144,19 +145,44 @@ class PlayerTracker:
         return player_detections
 
     def detect_frame(self, frame):
-        results = self.model.track(frame, persist=True, conf=0.7)[0]
+        # Step 1: Detect players with YOLO
+        results = self.model.predict(frame, conf=0.7)[0]
         id_name_dict = results.names
-        player_dict = {}
+
+        detections = []
         for box in results.boxes:
-            if box.id is None:
-                continue
-            track_id = int(box.id.tolist()[0])
             result = box.xyxy.tolist()[0]
+            confidence = box.conf.tolist()[0]
             object_cls_id = box.cls.tolist()[0]
             object_cls_name = id_name_dict[object_cls_id]
             if object_cls_name == "person":
-                shirt_color = self.extract_shirt_color(frame, result)
-                player_dict[track_id] = {"bbox": result, "shirt_color": shirt_color}
+                detections.append((result, confidence))
+
+        # Step 2: Update DeepSORT tracker
+        # Note: DeepSORT expects detections in format [(x1, y1, x2, y2), confidence]
+        tracks = self.deepsort.update_tracks(detections, frame=frame)
+
+        # Step 3: Build player_dict output
+        player_dict = {}
+        for track in tracks:
+            if not track.is_confirmed():
+                continue
+
+            track_id = track.track_id
+
+            # Depending on DeepSORT lib, get bbox
+            try:
+                bbox = track.to_xyxy()
+            except AttributeError:
+                # Fallback if no method available
+                bbox = track.detector_bbox
+
+            shirt_color = self.extract_shirt_color(frame, bbox)
+
+            player_dict[track_id] = {
+                "bbox": bbox,
+                "shirt_color": shirt_color
+            }
 
         return player_dict
 

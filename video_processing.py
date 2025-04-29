@@ -34,10 +34,12 @@ def process_video(video_path):
 
     print('Detecting Court Keypoints')
     court_keypoints = get_user_selected_points(first_frame)
+    print("Court Keypoints: ", court_keypoints)
 
     # print('Select Scoreboard')
     scoreboard_keypoints = get_user_selected_roi(first_frame)
-
+    print('Scoreboard ROI: ', scoreboard_keypoints)
+    return
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
 
@@ -50,7 +52,7 @@ def process_video(video_path):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
+    # out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
 
     os.makedirs(detections_path, exist_ok=True)
 
@@ -66,8 +68,8 @@ def process_video(video_path):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            if frame_idx == 1000:
-                break
+            # if frame_idx == 1000:
+            #     break
             ret, frame = cap.read()
             if not ret:
                 break
@@ -79,8 +81,8 @@ def process_video(video_path):
             player_detections.append(detections)
             filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
             player_detections = filtered_detections
-            output_frame = player_tracker.draw_bbox(frame, player_detections[-1])
-            out.write(output_frame)  # Write frame directly to video
+            # output_frame = player_tracker.draw_bbox(frame, player_detections[-1])
+            # out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
             if frame_idx % 1000 == 0 and not force_check:
@@ -156,7 +158,7 @@ def process_video(video_path):
 
 
     cap.release()
-    out.release()
+    # out.release()
     print(f"Final video saved to: {final_video_path}")
 
     # Load all detections for heatmap
@@ -203,13 +205,19 @@ def process_video(video_path):
     #Show distance graph
     #compute_distance_traveled(p1_mapped_detections)
 
-
+    winner = None
+    
 
 
     print("Uploaded to MongoDB")
     video_data = filename_parser(file_name)
+    if prev_p1_score > prev_p2_score:
+        winner = video_data['Player 1']
+    else:
+        winner = video_data['Player 2']
+    
     insert_match(video_data['Player 1'], video_data['Player 2'], video_data['Country'], video_data['Game Number'],
-                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections, video_data['Gender'])
+                 video_data['Skill Level'], p1_detections, p2_detections, court_keypoints, p1_mapped_detections.tolist(), p2_mapped_detections.tolist(), score_detections, video_data['Gender'], winner)
 
     print("Uploaded to Mongo")
 
@@ -225,16 +233,16 @@ def process_video(video_path):
 
 def process_videos_in_folder(folder_path):
     for filename in os.listdir(folder_path):
-        if filename.endswith(".mp4"):
+        if filename.endswith(".mp4") and filename.__contains__('Pro'):
             video_path = os.path.join(folder_path, filename)
             print(f"Processing video: {video_path}")
             process_video(video_path)
+            return
 
 if __name__ == '__main__':
     input_folder = "./input_videos"
-    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College_M.mp4")
-    # process_videos_in_folder(input_folder)
-    
+    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College_M.mp4")
+    process_videos_in_folder(input_folder)
     
 
 

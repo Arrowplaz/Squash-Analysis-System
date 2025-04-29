@@ -98,9 +98,9 @@ def create_heatmap(frame, court_keypoints, overlay_width=1800):
     overlay_canvas = add_overlay(overlay_canvas, overlay_height, overlay_width, padding=padding)
     
     overlay_canvas[padding:padding + overlay_height, padding:padding + overlay_width] = warped_image
-    cv2.imshow("Warped Image with Overlay", overlay_canvas)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("Warped Image with Overlay", overlay_canvas)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     return warped_image, overlay_canvas, homography_matrix
 
 def map_detections(detections, homography_matrix):
@@ -154,8 +154,8 @@ def overlay_heatmap(composite, mapped_detections):
 
     # # Display the final result
     # cv2.setWindowProperty("Court with Heatmap", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.imshow("Court with Heatmap", heatmap_overlay)
-    cv2.waitKey(0)
+    # cv2.imshow("Court with Heatmap", heatmap_overlay)
+    # cv2.waitKey(0)
 
     return heatmap
 

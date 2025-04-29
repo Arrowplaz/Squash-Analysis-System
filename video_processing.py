@@ -66,7 +66,7 @@ def process_video(video_path):
     chunk_size = 1000  # Save every 1000 frames
     if os.listdir(detections_path) == []:
         while cap.isOpened():
-            if frame_idx == 2000:
+            if frame_idx == 5000:
                 break
             ret, frame = cap.read()
             if not ret:
@@ -77,8 +77,8 @@ def process_video(video_path):
             # Process and track players
             detections = player_tracker.detect_frame(frame)
             player_detections.append(detections)
-            #filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
-            # player_detections = filtered_detections
+            filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
+            player_detections = filtered_detections
             output_frame = player_tracker.draw_bbox(frame, player_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 

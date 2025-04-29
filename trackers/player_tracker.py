@@ -17,7 +17,6 @@ class PlayerTracker:
         self.previous_shirt_colors = {}
         self.color_history = {}
         self.history_length = 200
-        self.deepsort = DeepSort(max_age=30, n_init=3, nms_max_overlap=1.0, max_cosine_distance=0.2)
 
     def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:
@@ -146,38 +145,19 @@ class PlayerTracker:
         return player_detections
 
     def detect_frame(self, frame):
-        # Step 1: Detect players with YOLO
-        results = self.model.predict(frame, conf=0.7)[0]
+        results = self.model.track(frame, persist=True, conf=0.7)[0]
         id_name_dict = results.names
-
-        detections = []
+        player_dict = {}
         for box in results.boxes:
+            if box.id is None:
+                continue
+            track_id = int(box.id.tolist()[0])
             result = box.xyxy.tolist()[0]
-            confidence = box.conf.tolist()[0]
             object_cls_id = box.cls.tolist()[0]
             object_cls_name = id_name_dict[object_cls_id]
             if object_cls_name == "person":
-                detections.append((result, confidence))
-
-        # Step 2: Update DeepSORT tracker
-        tracks = self.deepsort.update_tracks(detections, frame=frame)
-
-        # Step 3: Build player_dict output
-        player_dict = {}
-        for track in tracks:
-            if not track.is_confirmed():
-                continue
-
-            track_id = track.track_id
-            bbox = track.to_ltrb() # THIS is your bounding box [top_y, left_x, bottom_y, right_x]
-
-            # If your extract_shirt_color expects [x1,y1,x2,y2] you might need to reorder:
-            x1, y1, x2, y2 = bbox[1], bbox[0], bbox[3], bbox[2]
-            reordered_bbox = [x1, y1, x2, y2]
-
-            shirt_color = self.extract_shirt_color(frame, reordered_bbox)
-
-            player_dict[track_id] = reordered_bbox
+                shirt_color = self.extract_shirt_color(frame, result)
+                player_dict[track_id] = {"bbox": result, "shirt_color": shirt_color}
 
         return player_dict
 
@@ -202,7 +182,7 @@ class PlayerTracker:
             x1, y1, x2, y2 = bbox
             cv2.putText(frame, f"Player ID: {track_id}", (int(x1), int(y1) - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
-            if track_id == 1:
+            if track_id == self.main_ids[0]:
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 2)
             else:
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 2)

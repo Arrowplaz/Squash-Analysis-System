@@ -169,7 +169,7 @@ class PlayerTracker:
                 continue
 
             track_id = track.track_id
-            bbox = track.tlbr  # THIS is your bounding box [top_y, left_x, bottom_y, right_x]
+            bbox = track.to_ltrb() # THIS is your bounding box [top_y, left_x, bottom_y, right_x]
 
             # If your extract_shirt_color expects [x1,y1,x2,y2] you might need to reorder:
             x1, y1, x2, y2 = bbox[1], bbox[0], bbox[3], bbox[2]

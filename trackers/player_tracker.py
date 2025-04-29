@@ -50,7 +50,7 @@ class PlayerTracker:
         positional_bias_weight = 30     # how much bias to add based on position (you can tweak this)
 
         # Precompute court center
-        court_center_x = (court_keypoints[0][0] + court_keypoints[1][0]) / 2
+        court_center_x = (court_keypoints[0] + court_keypoints[2]) / 2
 
         for new_pid in chosen_players:
             new_color = chosen_players[new_pid]["shirt_color"]

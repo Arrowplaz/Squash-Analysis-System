@@ -72,11 +72,6 @@ def process_video(video_path):
             # if frame_idx == 1000:
             #     break
             ret, frame = cap.read()
-            if frame_idx < 15000:
-                frame_idx += 1
-                print(f'Processing frame: {frame_idx}')
-                continue
-            
             if not ret:
                 break
 

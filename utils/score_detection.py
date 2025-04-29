@@ -1,62 +1,52 @@
+import pytesseract
 import cv2
 import re
-import easyocr
 
 score_box_coords = []
 
-# Enable GPU for EasyOCR
-reader = easyocr.Reader(['en'], gpu=True)
-
-def get_user_selected_roi(frame, meta=None):
+def get_user_selected_roi(frame, meta = None):
     global score_box_coords
 
     if meta is not None:
         score_box_coords = meta
         return score_box_coords
-
     print("Select the region of interest (ROI) for the scoreboard.")
     cv2.namedWindow("Select Scoreboard ROI", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty("Select Scoreboard ROI", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     score_box_coords = cv2.selectROI("Select Scoreboard ROI", frame, fromCenter=False, showCrosshair=True)
+    
     cv2.destroyAllWindows()
     return score_box_coords
 
+# Function to detect the score from the scoreboard
 def detect_score(frame):
     global score_box_coords
     x, y, w, h = score_box_coords
     score_roi = frame[y:y+h, x:x+w]
 
-    # Convert to grayscale
+    # Convert to grayscale and apply threshold
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
 
-    # Use EasyOCR to detect text
-    result = reader.readtext(gray, detail=0)
-    full_text = " ".join(result).strip()
-    print("FULL TEXT:", full_text)
+    # OCR the score region with digit-only whitelist
+    custom_config = r'--psm 6 -c tessedit_char_whitelist=0123456789-'
+    full_text = pytesseract.image_to_string(thresh, config=custom_config)
+    print('RAW OCR TEXT:', full_text)
 
-    # Manually correct common OCR misinterpretations
-    corrected_text = full_text.upper()
-    corrected_text = corrected_text.replace('S', '5')
-    corrected_text = corrected_text.replace('O', '0')
-    corrected_text = corrected_text.replace('I', '1')
-    corrected_text = corrected_text.replace('L', '1')
-    corrected_text = corrected_text.replace('Z', '2')
-    corrected_text = corrected_text.replace('G', '6')
+    # Remove whitespace and keep only digits and dashes
+    cleaned_text = re.sub(r'\s+', '', full_text)
+    cleaned_text = re.sub(r'[^0-9\-]', '', cleaned_text)
+    print('CLEANED TEXT:', cleaned_text)
 
-    print("CORRECTED TEXT:", corrected_text)
-
-    # Keep only digits and dashes
-    cleaned_text = re.sub(r'[^0-9\-]', '', corrected_text)
-    print("CLEANED TEXT:", cleaned_text)
-
+    # Parse scores
     if '-' in cleaned_text:
-        left, right = cleaned_text.split('-', 1)
+        parts = cleaned_text.split('-', 1)
         try:
-            player1_score = int(left)
+            player1_score = int(parts[0])
         except ValueError:
             player1_score = None
         try:
-            player2_score = int(right)
+            player2_score = int(parts[1])
         except ValueError:
             player2_score = None
     else:
@@ -66,22 +56,29 @@ def detect_score(frame):
     return player1_score, player2_score
 
 def preprocess_scores(scores):
+    """
+    Preprocess detected scores to clean and normalize the data.
+    """
     cleaned_scores = {}
     prev_score = None
 
     for frame, (score1, score2) in scores.items():
-        score1 = score1.strip("-.") if isinstance(score1, str) and score1.strip("-.").isdigit() else score1
-        score2 = score2.strip("-.") if isinstance(score2, str) and score2.strip("-.").isdigit() else score2
+        # Normalize scores
+        score1 = score1.strip("-.") if score1.strip("-.").isdigit() else ""
+        score2 = score2.strip("-.") if score2.strip("-.").isdigit() else ""
 
+        # Skip if either scores are empty
         if not score1 or not score2:
             continue
 
+        # Convert to integers if valid
         try:
-            score1 = int(score1) if score1 != '' else None
-            score2 = int(score2) if score2 != '' else None
+            score1 = int(score1) if score1 else None
+            score2 = int(score2) if score2 else None
         except ValueError:
-            continue
+            continue  # Skip invalid scores
 
+        # Check for score changes
         current_score = (score1, score2)
         if current_score != prev_score:
             cleaned_scores[frame] = current_score
@@ -89,16 +86,19 @@ def preprocess_scores(scores):
 
     return cleaned_scores
 
+
+# Function to analyze scoreboard and segment video by points
 def analyze_scoreboard(video_frames):
     global score_box_coords
     scores = {}
     prev_score = None
-
+    counter = 0
     for i, frame in enumerate(video_frames):
-        print(f"Scoreboard: {i+1}/{len(video_frames)}")
+        counter += 1
+        print(f"Scoreboard: {counter}/{len(video_frames)}")
         score = detect_score(frame)
         if score and score != prev_score:
-            scores[i] = score
+            scores[i] = score  # Log frame number and score
             prev_score = score
-
+    
     return scores

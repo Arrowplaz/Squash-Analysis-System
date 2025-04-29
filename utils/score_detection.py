@@ -19,41 +19,59 @@ def get_user_selected_roi(frame, meta = None):
     return score_box_coords
 
 # Function to detect the score from the scoreboard
+
+
 def detect_score(frame):
     global score_box_coords
     x, y, w, h = score_box_coords
     score_roi = frame[y:y+h, x:x+w]
 
-    # Convert to grayscale and apply threshold
+    # Convert to grayscale
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
+
+    # Preprocess ROI
     _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
 
-    # OCR the score region with digit-only whitelist
-    custom_config = r'--psm 6 -c tessedit_char_whitelist=0123456789-'
-    full_text = pytesseract.image_to_string(thresh, config=custom_config)
-    print('RAW OCR TEXT:', full_text)
+    # OCR with configuration to only detect numbers and common misinterpreted characters
+    custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-OSIlZG'
+    full_text = pytesseract.image_to_string(thresh, config=custom_config).strip()
+    print('FULL TEXT: ', full_text)
 
-    # Remove whitespace and keep only digits and dashes
-    cleaned_text = re.sub(r'\s+', '', full_text)
-    cleaned_text = re.sub(r'[^0-9\-]', '', cleaned_text)
-    print('CLEANED TEXT:', cleaned_text)
+    # Manually replace common OCR misinterpretations
+    # For example, replace 'S' with '5', 'O' with '0', etc.
+    corrected_text = full_text
+    corrected_text = corrected_text.replace('S', '5')  # S -> 5
+    corrected_text = corrected_text.replace('O', '0')  # O -> 0
+    corrected_text = corrected_text.replace('I', '1')  # I -> 1
+    corrected_text = corrected_text.replace('l', '1')  # l -> 1 (lowercase L)
+    corrected_text = corrected_text.replace('Z', '2')  # Z -> 2
+    corrected_text = corrected_text.replace('G', '6')  # G -> 6
 
-    # Parse scores
+    print('CORRECTED TEXT: ', corrected_text)
+
+    # Keep only digits and dashes (remove other noise)
+    cleaned_text = re.sub(r'[^0-9\-]', '', corrected_text)
+    print('CLEANED_TEXT: ', cleaned_text)
+
+    # Split by dash if present
     if '-' in cleaned_text:
-        parts = cleaned_text.split('-', 1)
+        left, right = cleaned_text.split('-', 1)
         try:
-            player1_score = int(parts[0])
+            player1_score = int(left)
         except ValueError:
             player1_score = None
         try:
-            player2_score = int(parts[1])
+            player2_score = int(right)
         except ValueError:
             player2_score = None
     else:
+        # No dash found — fallback
         player1_score = player2_score = None
 
-    print("SCORES:", player1_score, player2_score)
+    print("SCORES: ", player1_score, player2_score)
     return player1_score, player2_score
+
+
 
 def preprocess_scores(scores):
     """

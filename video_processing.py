@@ -58,8 +58,8 @@ def process_video(video_path):
 
     player_detections = []
     score_detections = []  # List to store score detections
-    prev_p1_score = -1
-    prev_p2_score = -1
+    prev_p1_score = 0
+    prev_p2_score = 0
     last_winner = None
 
     frame_idx = 0

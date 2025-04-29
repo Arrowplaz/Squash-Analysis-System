@@ -24,23 +24,35 @@ def detect_score(frame):
     x, y, w, h = score_box_coords
     score_roi = frame[y:y+h, x:x+w]
 
-    # Convert to grayscale and threshold
+    # Convert to grayscale and apply threshold
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
 
-    # OCR
-    full_text = pytesseract.image_to_string(thresh, config='--psm 6').strip()
-    print('FULL TEXT: ', full_text)
+    # OCR the score region with digit-only whitelist
+    custom_config = r'--psm 6 -c tessedit_char_whitelist=0123456789-'
+    full_text = pytesseract.image_to_string(thresh, config=custom_config)
+    print('RAW OCR TEXT:', full_text)
 
-    # Look for score pattern: number - number
-    match = re.search(r'(\d{1,2})\s*-\s*(\d{1,2})', full_text)
-    if match:
-        player1_score = int(match.group(1))
-        player2_score = int(match.group(2))
+    # Remove whitespace and keep only digits and dashes
+    cleaned_text = re.sub(r'\s+', '', full_text)
+    cleaned_text = re.sub(r'[^0-9\-]', '', cleaned_text)
+    print('CLEANED TEXT:', cleaned_text)
+
+    # Parse scores
+    if '-' in cleaned_text:
+        parts = cleaned_text.split('-', 1)
+        try:
+            player1_score = int(parts[0])
+        except ValueError:
+            player1_score = None
+        try:
+            player2_score = int(parts[1])
+        except ValueError:
+            player2_score = None
     else:
         player1_score = player2_score = None
 
-    print("SCORES: ", player1_score, player2_score)
+    print("SCORES:", player1_score, player2_score)
     return player1_score, player2_score
 
 def preprocess_scores(scores):

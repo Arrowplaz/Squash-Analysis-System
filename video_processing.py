@@ -86,7 +86,7 @@ def process_video(video_path):
             # out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            if frame_idx % 1000 == 0 or force_check:
+            if frame_idx % 100 == 0 or force_check:
                 if force_check:
                     print("FORCE CHECKING")
                 try:

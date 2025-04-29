@@ -174,6 +174,8 @@ def process_video(video_path):
             with open(os.path.join(detections_path, file), 'rb') as f:
                 score_detections.extend(pickle.load(f))
     
+    print(score_detections)
+    
 
     print('Generating Heatmap...')
     court_keypoints = list(zip(court_keypoints[::2], court_keypoints[1::2]))
@@ -243,8 +245,8 @@ def process_videos_in_folder(folder_path):
 
 if __name__ == '__main__':
     input_folder = "./input_videos"
-    # process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College_M.mp4")
-    process_videos_in_folder(input_folder)
+    process_video("./input_videos/Ryunosuke_Tsukue_V_Yassin_Elshafei_#US_Game3_Pro_M.mp4")
+    # process_videos_in_folder(input_folder)
     
 
 

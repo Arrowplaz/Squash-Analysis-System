@@ -94,13 +94,13 @@ def process_video(video_path):
                     if player1_score is not None and player2_score is not None:
                         force_check = False
                         player1_score, player2_score = int(player1_score), int(player2_score)
-                        # valid_increment = (
-                        #     (player1_score == prev_p1_score + 1 and player2_score == prev_p2_score) or
-                        #     (player2_score == prev_p2_score + 1 and player1_score == prev_p1_score) or
-                        #     (player1_score == prev_p1_score and player2_score == prev_p2_score)
-                        # )
-                        # if not valid_increment:
-                        #     raise Exception(f"Not valid increment, previous scores {prev_p1_score}, {prev_p2_score}")
+                        valid_increment = (
+                            (player1_score == prev_p1_score + 1 and player2_score == prev_p2_score) or
+                            (player2_score == prev_p2_score + 1 and player1_score == prev_p1_score) or
+                            (player1_score == prev_p1_score and player2_score == prev_p2_score)
+                        )
+                        if not valid_increment:
+                            raise Exception(f"Not valid increment, previous scores {prev_p1_score}, {prev_p2_score}")
 
                         print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
                         if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):

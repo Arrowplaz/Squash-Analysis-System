@@ -71,6 +71,10 @@ def process_video(video_path):
         while cap.isOpened():
             # if frame_idx == 1000:
             #     break
+            if frame_idx < 15000:
+                frame_idx += 1
+                print(f'Processing frame: {frame_idx}')
+                continue
             ret, frame = cap.read()
             if not ret:
                 break

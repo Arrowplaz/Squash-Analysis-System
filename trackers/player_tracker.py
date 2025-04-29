@@ -17,6 +17,7 @@ class PlayerTracker:
         self.previous_shirt_colors = {}
         self.color_history = {}
         self.history_length = 200
+        self.deepsort = DeepSort(max_age=30, n_init=3, nms_max_overlap=1.0, max_cosine_distance=0.2)
 
     def choose_and_filter_players(self, player_detections, court_keypoints):
         if not player_detections:

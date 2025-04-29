@@ -23,14 +23,30 @@ def detect_score(frame):
     # Convert to grayscale
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
 
-    # Preprocess ROI (e.g., thresholding)
+    # Preprocess ROI
     _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
 
     # OCR the entire ROI
     full_text = pytesseract.image_to_string(thresh, config='--psm 6').strip()
-    print("FULL SCORE: ", full_text)
-    player1_score = 0
-    player2_score = 0
+
+    # Keep only digits and dashes
+    cleaned_text = re.sub(r'[^0-9\-]', '', full_text)
+
+    # Split by dash
+    if '-' in cleaned_text:
+        left, right = cleaned_text.split('-', 1)
+        try:
+            player1_score = int(left)
+        except ValueError:
+            player1_score = None
+        try:
+            player2_score = int(right)
+        except ValueError:
+            player2_score = None
+    else:
+        # No dash found — fallback
+        player1_score = player2_score = None
+
     return player1_score, player2_score
 
 def preprocess_scores(scores):

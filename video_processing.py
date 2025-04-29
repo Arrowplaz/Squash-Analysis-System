@@ -99,8 +99,8 @@ def process_video(video_path):
                             (player2_score == prev_p2_score + 1 and player1_score == prev_p1_score) or
                             (player1_score == prev_p1_score and player2_score == prev_p2_score)
                         )
-                        if not valid_increment:
-                            raise Exception(f"Not valid increment, previous scores {prev_p1_score}, {prev_p2_score}")
+                        # if not valid_increment:
+                        #     raise Exception(f"Not valid increment, previous scores {prev_p1_score}, {prev_p2_score}")
 
                         print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
                         if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
@@ -125,11 +125,11 @@ def process_video(video_path):
                             last_winner = point_winner
                             
                     else:
-                        force_check = True
+                        force_check = False
                 except Exception as e:
                     print(e)
                     print(f"Faulty OCR detection at frame {frame_idx}. Retrying...")
-                    force_check = True
+                    force_check = False
                     
             # Periodically save detections to disk and free memory
             if frame_idx % chunk_size == 0 and frame_idx > 0:

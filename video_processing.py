@@ -127,8 +127,8 @@ def process_video(video_path):
                     else:
                         raise Exception
                 except Exception as e:
-                    if force_check and ((frame_idx - 25) % 100 == 0):
-                        force_check = False
+                    # if force_check and ((frame_idx - 25) % 100 == 0):
+                    #     force_check = False
                     print(e)
                     print(f"Faulty OCR detection at frame {frame_idx}. Retrying...")
                     force_check = True
@@ -247,7 +247,7 @@ def process_videos_in_folder(folder_path):
 
 if __name__ == '__main__':
     input_folder = "./input_videos"
-    process_video("./input_videos/Marwan_Elshorbagy_V_Gregoire_Marche_#US_Game1_Pro_M.mp4")
+    process_video("./input_videos/Marwan_Elshorbagy_V_Gregoire_Marche_#US_Game2_Pro_M.mp4")
     # process_videos_in_folder(input_folder)
     
 

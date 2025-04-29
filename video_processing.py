@@ -57,7 +57,7 @@ def process_video(video_path):
 
     os.makedirs(detections_path, exist_ok=True)
 
-    force_check = True
+    force_check = False
 
     player_detections = []
     score_detections = []  # List to store score detections
@@ -86,7 +86,7 @@ def process_video(video_path):
             # out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            if frame_idx % 1000 == 0 and not force_check:
+            if frame_idx % 1000 == 0 or force_check:
                 if force_check:
                     print("FORCE CHECKING")
                 try:
@@ -245,8 +245,8 @@ def process_videos_in_folder(folder_path):
 
 if __name__ == '__main__':
     input_folder = "./input_videos"
-    process_video("./input_videos/Ryunosuke_Tsukue_V_Yassin_Elshafei_#US_Game3_Pro_M.mp4")
-    # process_videos_in_folder(input_folder)
+    # process_video("./input_videos/Ryunosuke_Tsukue_V_Yassin_Elshafei_#US_Game3_Pro_M.mp4")
+    process_videos_in_folder(input_folder)
     
 
 

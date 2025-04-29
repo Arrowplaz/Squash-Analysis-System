@@ -1,9 +1,12 @@
 import pytesseract
 import cv2
 import re
+import easyocr
 
 score_box_coords = []
 
+
+reader = easyocr.Reader(['en'], gpu=True)
 def get_user_selected_roi(frame, meta = None):
     global score_box_coords
 
@@ -19,41 +22,35 @@ def get_user_selected_roi(frame, meta = None):
     return score_box_coords
 
 # Function to detect the score from the scoreboard
-
-
 def detect_score(frame):
     global score_box_coords
     x, y, w, h = score_box_coords
     score_roi = frame[y:y+h, x:x+w]
 
-    # Convert to grayscale
+    # Convert to grayscale (optional for EasyOCR, but may help)
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
 
-    # Preprocess ROI
-    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
-
-    # OCR with configuration to only detect numbers and common misinterpreted characters
-    custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-OSIlZG'
-    full_text = pytesseract.image_to_string(thresh, config=custom_config).strip()
+    # Run OCR on the ROI
+    result = reader.readtext(gray, detail=0)
+    full_text = ''.join(result).strip()
     print('FULL TEXT: ', full_text)
 
     # Manually replace common OCR misinterpretations
-    # For example, replace 'S' with '5', 'O' with '0', etc.
     corrected_text = full_text
     corrected_text = corrected_text.replace('S', '5')  # S -> 5
     corrected_text = corrected_text.replace('O', '0')  # O -> 0
     corrected_text = corrected_text.replace('I', '1')  # I -> 1
-    corrected_text = corrected_text.replace('l', '1')  # l -> 1 (lowercase L)
+    corrected_text = corrected_text.replace('l', '1')  # l -> 1
     corrected_text = corrected_text.replace('Z', '2')  # Z -> 2
     corrected_text = corrected_text.replace('G', '6')  # G -> 6
 
     print('CORRECTED TEXT: ', corrected_text)
 
-    # Keep only digits and dashes (remove other noise)
+    # Clean: Keep only digits and dashes
     cleaned_text = re.sub(r'[^0-9\-]', '', corrected_text)
     print('CLEANED_TEXT: ', cleaned_text)
 
-    # Split by dash if present
+    # Split by dash
     if '-' in cleaned_text:
         left, right = cleaned_text.split('-', 1)
         try:
@@ -65,7 +62,6 @@ def detect_score(frame):
         except ValueError:
             player2_score = None
     else:
-        # No dash found — fallback
         player1_score = player2_score = None
 
     print("SCORES: ", player1_score, player2_score)

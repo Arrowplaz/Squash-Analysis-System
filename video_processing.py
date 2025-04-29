@@ -54,6 +54,8 @@ def process_video(video_path):
 
     os.makedirs(detections_path, exist_ok=True)
 
+    force_check = False
+
     player_detections = []
     score_detections = []  # List to store score detections
     prev_p1_score = -1
@@ -80,7 +82,6 @@ def process_video(video_path):
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 
-            force_check = False
             #Detect scoreboard
             if frame_idx % 100 == 0 or force_check:
                 try:

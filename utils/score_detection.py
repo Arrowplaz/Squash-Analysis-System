@@ -1,5 +1,6 @@
 import pytesseract
 import cv2
+import re
 
 score_box_coords = []
 
@@ -15,10 +16,6 @@ def get_user_selected_roi(frame):
 
 # Function to detect the score from the scoreboard
 def detect_score(frame):
-    """
-    Detects the scores from the scoreboard ROI.
-    Assumes the scoreboard has two separate numbers representing player scores.
-    """
     global score_box_coords
     x, y, w, h = score_box_coords
     score_roi = frame[y:y+h, x:x+w]
@@ -43,8 +40,12 @@ def detect_score(frame):
     _, player2_thresh = cv2.threshold(player2_roi, 127, 255, cv2.THRESH_BINARY_INV)
 
     # Apply Tesseract OCR to each sub-ROI
-    player1_score = pytesseract.image_to_string(player1_thresh, config='--psm 7 digits').strip()
-    player2_score = pytesseract.image_to_string(player2_thresh, config='--psm 7 digits').strip()
+    player1_text = pytesseract.image_to_string(player1_thresh, config='--psm 7 digits').strip()
+    player2_text = pytesseract.image_to_string(player2_thresh, config='--psm 7 digits').strip()
+
+    # Remove any non-digit characters
+    player1_score = re.sub(r'\D', '', player1_text)
+    player2_score = re.sub(r'\D', '', player2_text)
 
     return player1_score, player2_score
 

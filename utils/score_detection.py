@@ -23,32 +23,14 @@ def detect_score(frame):
     # Convert to grayscale
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
 
-    # Decide split direction
-    if h > w:
-        # Taller than wide: split horizontally
-        split_line = h // 2
-        player1_roi = gray[:split_line, :]   # Top half
-        player2_roi = gray[split_line:, :]   # Bottom half
-    else:
-        # Wider than tall: split vertically
-        split_line = w // 2
-        player1_roi = gray[:, :split_line]   # Left half
-        player2_roi = gray[:, split_line:]   # Right half
+    # Preprocess ROI (e.g., thresholding)
+    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
 
-    # Preprocess both sub-ROIs (e.g., thresholding)
-    _, player1_thresh = cv2.threshold(player1_roi, 127, 255, cv2.THRESH_BINARY_INV)
-    _, player2_thresh = cv2.threshold(player2_roi, 127, 255, cv2.THRESH_BINARY_INV)
-
-    # Apply Tesseract OCR to each sub-ROI
-    player1_text = pytesseract.image_to_string(player1_thresh, config='--psm 7 digits').strip()
-    player2_text = pytesseract.image_to_string(player2_thresh, config='--psm 7 digits').strip()
-    print('P1 SCORE: ', player1_text)
-    print('P2 SCORE: ', player2_text)
-
-    # Remove any non-digit characters
-    player1_score = re.sub(r'\D', '', player1_text)
-    player2_score = re.sub(r'\D', '', player2_text)
-
+    # OCR the entire ROI
+    full_text = pytesseract.image_to_string(thresh, config='--psm 6').strip()
+    print("FULL SCORE: ", full_text)
+    player1_score = 0
+    player2_score = 0
     return player1_score, player2_score
 
 def preprocess_scores(scores):

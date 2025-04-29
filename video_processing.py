@@ -78,7 +78,7 @@ def process_video(video_path):
             detections = player_tracker.detect_frame(frame)
             player_detections.append(detections)
             #filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
-            player_detections = filtered_detections
+            # player_detections = filtered_detections
             output_frame = player_tracker.draw_bbox(frame, filtered_detections[-1])
             out.write(output_frame)  # Write frame directly to video
 

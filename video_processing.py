@@ -13,7 +13,7 @@ from trackers import PlayerTracker
 import numpy as np
 
 def process_video(video_path):
-    os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
+    # os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
     print('Opening Video')
     base_name = os.path.basename(video_path)
     file_name, _ = os.path.splitext(base_name)
@@ -233,6 +233,7 @@ def process_video(video_path):
 
 def process_videos_in_folder(folder_path):
     for filename in os.listdir(folder_path):
+        print('filename: ', filename)
         if filename.endswith(".mp4") and filename.__contains__('Pro'):
             video_path = os.path.join(folder_path, filename)
             print(f"Processing video: {video_path}")

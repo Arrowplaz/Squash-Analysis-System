@@ -28,10 +28,11 @@ def detect_score(frame):
 
     # OCR the entire ROI
     full_text = pytesseract.image_to_string(thresh, config='--psm 6').strip()
+    print('FULL TEXT: ', full_text)
 
     # Keep only digits and dashes
     cleaned_text = re.sub(r'[^0-9\-]', '', full_text)
-
+    print('CLEANED_TEXT: ', cleaned_text)
     # Split by dash
     if '-' in cleaned_text:
         left, right = cleaned_text.split('-', 1)
@@ -47,6 +48,7 @@ def detect_score(frame):
         # No dash found — fallback
         player1_score = player2_score = None
 
+    print("SCORES: ", player1_score, player2_score)
     return player1_score, player2_score
 
 def preprocess_scores(scores):

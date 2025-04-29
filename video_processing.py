@@ -127,7 +127,7 @@ def process_video(video_path):
                     else:
                         raise Exception
                 except Exception as e:
-                    if force_check and ((frame_idx - 50) % 100 == 0):
+                    if force_check and ((frame_idx - 25) % 100 == 0):
                         force_check = False
                     print(e)
                     print(f"Faulty OCR detection at frame {frame_idx}. Retrying...")

@@ -42,6 +42,8 @@ def detect_score(frame):
     # Apply Tesseract OCR to each sub-ROI
     player1_text = pytesseract.image_to_string(player1_thresh, config='--psm 7 digits').strip()
     player2_text = pytesseract.image_to_string(player2_thresh, config='--psm 7 digits').strip()
+    print('P1 SCORE: ', player1_text)
+    print('P2 SCORE: ', player2_text)
 
     # Remove any non-digit characters
     player1_score = re.sub(r'\D', '', player1_text)

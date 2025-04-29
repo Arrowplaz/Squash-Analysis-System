@@ -232,7 +232,7 @@ def process_videos_in_folder(folder_path):
 
 if __name__ == '__main__':
     input_folder = "./input_videos"
-    process_video("./input_videos/Tom_Walsh_V_Sanjay_Jeeva_#Canada_Game1_Pro_M.mp4")
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College_M.mp4")
     # process_videos_in_folder(input_folder)
     
     

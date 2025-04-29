@@ -160,7 +160,6 @@ class PlayerTracker:
                 detections.append((result, confidence))
 
         # Step 2: Update DeepSORT tracker
-        # Note: DeepSORT expects detections in format [(x1, y1, x2, y2), confidence]
         tracks = self.deepsort.update_tracks(detections, frame=frame)
 
         # Step 3: Build player_dict output
@@ -170,18 +169,16 @@ class PlayerTracker:
                 continue
 
             track_id = track.track_id
+            bbox = track.tlbr  # THIS is your bounding box [top_y, left_x, bottom_y, right_x]
 
-            # Depending on DeepSORT lib, get bbox
-            try:
-                bbox = track.to_xyxy()
-            except AttributeError:
-                # Fallback if no method available
-                bbox = track.detector_bbox
+            # If your extract_shirt_color expects [x1,y1,x2,y2] you might need to reorder:
+            x1, y1, x2, y2 = bbox[1], bbox[0], bbox[3], bbox[2]
+            reordered_bbox = [x1, y1, x2, y2]
 
-            shirt_color = self.extract_shirt_color(frame, bbox)
+            shirt_color = self.extract_shirt_color(frame, reordered_bbox)
 
             player_dict[track_id] = {
-                "bbox": bbox,
+                "bbox": reordered_bbox,
                 "shirt_color": shirt_color
             }
 

@@ -4,8 +4,12 @@ import re
 
 score_box_coords = []
 
-def get_user_selected_roi(frame):
+def get_user_selected_roi(frame, meta = None):
     global score_box_coords
+
+    if meta is not None:
+        score_box_coords = meta
+        return score_box_coords
     print("Select the region of interest (ROI) for the scoreboard.")
     cv2.namedWindow("Select Scoreboard ROI", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty("Select Scoreboard ROI", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)

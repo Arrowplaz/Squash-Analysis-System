@@ -39,8 +39,9 @@ def process_video(video_path):
 
     score_points = (912, 961, 97, 36)
     # print('Select Scoreboard')
-    scoreboard_keypoints = get_user_selected_roi(first_frame, meta=score_points)
+    scoreboard_keypoints = get_user_selected_roi(first_frame)
     print('Scoreboard ROI: ', scoreboard_keypoints)
+    return
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
 
@@ -245,8 +246,8 @@ def process_videos_in_folder(folder_path):
 
 if __name__ == '__main__':
     input_folder = "./input_videos"
-    # process_video("./input_videos/Ryunosuke_Tsukue_V_Yassin_Elshafei_#US_Game3_Pro_M.mp4")
-    process_videos_in_folder(input_folder)
+    process_video("./input_videos/Marwan_Elshorbagy_V_Gregoire_Marche_#US_Game1_Pro_M.mp4")
+    # process_videos_in_folder(input_folder)
     
 
 

@@ -30,35 +30,47 @@ def detect_score(frame):
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
 
     # Use EasyOCR to detect text
-    result = reader.readtext(gray, detail=0)
-    full_text = " ".join(result).strip()
-    print("FULL TEXT:", full_text)
+    result = reader.readtext(gray, detail=1)  # We need details for bounding boxes
+    print("OCR Result:", result)
+
+    # Initialize variables to store player scores
+    player1_score = None
+    player2_score = None
 
     # Manually correct common OCR misinterpretations
-    corrected_text = full_text.upper()
-    corrected_text = corrected_text.replace('S', '5')
-    corrected_text = corrected_text.replace('O', '0')
-    corrected_text = corrected_text.replace('I', '1')
-    corrected_text = corrected_text.replace('L', '1')
-    corrected_text = corrected_text.replace('Z', '2')
-    corrected_text = corrected_text.replace('G', '6')
+    corrected_text = ""
+    for text, box in result:
+        # Correct the misinterpretations for each piece of text
+        text = text.upper()
+        text = text.replace('S', '5').replace('O', '0').replace('I', '1')\
+                   .replace('L', '1').replace('Z', '2').replace('G', '6')
 
-    print("CORRECTED TEXT:", corrected_text)
+        corrected_text += text + " "
+
+    print("CORRECTED TEXT:", corrected_text.strip())
 
     # Keep only digits and dashes
-    cleaned_text = re.sub(r'[^0-9\-]', '', corrected_text)
+    cleaned_text = re.sub(r'[^0-9\-]', '', corrected_text.strip())
     print("CLEANED TEXT:", cleaned_text)
 
     if '-' in cleaned_text:
+        # Split by the dash
         left, right = cleaned_text.split('-', 1)
+        
         try:
-            player1_score = int(left)
+            # Get the y-coordinates of the text boxes to determine top vs bottom
+            top_box_y = result[0][1][0][1]  # Top text box y-coordinate (1st element)
+            bottom_box_y = result[1][1][0][1]  # Bottom text box y-coordinate (2nd element)
+
+            # Assign top score to player 1, bottom score to player 2
+            if top_box_y < bottom_box_y:
+                player1_score = int(left)
+                player2_score = int(right)
+            else:
+                player1_score = int(right)
+                player2_score = int(left)
         except ValueError:
-            player1_score = None
-        try:
-            player2_score = int(right)
-        except ValueError:
-            player2_score = None
+            player1_score = player2_score = None
     else:
         player1_score = player2_score = None
 

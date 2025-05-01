@@ -33,13 +33,15 @@ def process_video(video_path):
         return
 
     print('Detecting Court Keypoints')
-    # court_keypoints = get_user_selected_points(first_frame)
-    court_keypoints = [722, 462, 1297, 462, 385, 777, 1650, 797]
+    court_keypoints = get_user_selected_points(first_frame)
+    # court_keypoints = [722, 462, 1297, 462, 385, 777, 1650, 797]
     print("Court Keypoints: ", court_keypoints)
+    return
 
     score_points = (910, 957, 100, 41)
     print('Select Scoreboard')
-    scoreboard_keypoints = get_user_selected_roi(first_frame, meta=score_points)
+    scoreboard_keypoints = get_user_selected_roi(first_frame)
+    return
     print('Scoreboard ROI: ', scoreboard_keypoints)
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
@@ -243,7 +245,7 @@ def process_video(video_path):
 def process_videos_in_folder(folder_path):
     for filename in os.listdir(folder_path):
         print('filename: ', filename)
-        if filename.endswith(".mp4") and filename.__contains__('Pro'):
+        if filename.endswith(".mp4") and filename.__contains__('College'):
             video_path = os.path.join(folder_path, filename)
             print(f"Processing video: {video_path}")
             process_video(video_path)

@@ -87,52 +87,52 @@ def process_video(video_path):
             out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
-            if frame_idx % 100 == 0 or force_check:
-                if force_check:
-                    print("FORCE CHECKING")
-                try:
-                    player1_score, player2_score = detect_score(frame)                    
-                    if player1_score is not None and player2_score is not None:
-                        force_check = False
-                        player1_score, player2_score = int(player1_score), int(player2_score)
-                        # valid_increment = (
-                        #     (player1_score == prev_p1_score + 1 and player2_score == prev_p2_score) or
-                        #     (player2_score == prev_p2_score + 1 and player1_score == prev_p1_score) or
-                        #     (player1_score == prev_p1_score and player2_score == prev_p2_score)
-                        # )
-                        # if not valid_increment:
-                        #     raise Exception(f"Not valid increment, previous scores {prev_p1_score}, {prev_p2_score}")
+            # if frame_idx % 100 == 0 or force_check:
+            #     if force_check:
+            #         print("FORCE CHECKING")
+            #     try:
+            #         player1_score, player2_score = detect_score(frame)                    
+            #         if player1_score is not None and player2_score is not None:
+            #             force_check = False
+            #             player1_score, player2_score = int(player1_score), int(player2_score)
+            #             # valid_increment = (
+            #             #     (player1_score == prev_p1_score + 1 and player2_score == prev_p2_score) or
+            #             #     (player2_score == prev_p2_score + 1 and player1_score == prev_p1_score) or
+            #             #     (player1_score == prev_p1_score and player2_score == prev_p2_score)
+            #             # )
+            #             # if not valid_increment:
+            #             #     raise Exception(f"Not valid increment, previous scores {prev_p1_score}, {prev_p2_score}")
 
-                        print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
-                        if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
-                            point_winner = None
-                            if player1_score != prev_p1_score and player1_score > prev_p1_score:
-                                point_winner = 'Player 1'
-                            elif player2_score != prev_p2_score and player2_score > prev_p2_score:
-                                point_winner = 'Player 2'
+            #             print(f"Scores: Player 1 - {player1_score}, Player 2 - {player2_score}")
+            #             if (player1_score != prev_p1_score) or (player2_score != prev_p2_score):
+            #                 point_winner = None
+            #                 if player1_score != prev_p1_score and player1_score > prev_p1_score:
+            #                     point_winner = 'Player 1'
+            #                 elif player2_score != prev_p2_score and player2_score > prev_p2_score:
+            #                     point_winner = 'Player 2'
 
-                            # Append score detection only when there is a change
-                            score_detections.append({
-                                'frame_idx': frame_idx,
-                                'player1_score': player1_score,
-                                'player2_score': player2_score,
-                                'point_winner': point_winner
-                            })
-                            print(f"Point Winner: {point_winner}")
+            #                 # Append score detection only when there is a change
+            #                 score_detections.append({
+            #                     'frame_idx': frame_idx,
+            #                     'player1_score': player1_score,
+            #                     'player2_score': player2_score,
+            #                     'point_winner': point_winner
+            #                 })
+            #                 print(f"Point Winner: {point_winner}")
 
-                            # Update previous scores
-                            prev_p1_score = player1_score
-                            prev_p2_score = player2_score
-                            last_winner = point_winner
+            #                 # Update previous scores
+            #                 prev_p1_score = player1_score
+            #                 prev_p2_score = player2_score
+            #                 last_winner = point_winner
                             
-                    else:
-                        raise Exception
-                except Exception as e:
-                    # if force_check and ((frame_idx - 25) % 100 == 0):
-                    #     force_check = False
-                    print(e)
-                    print(f"Faulty OCR detection at frame {frame_idx}. Retrying...")
-                    force_check = True
+            #         else:
+            #             raise Exception
+            #     except Exception as e:
+            #         # if force_check and ((frame_idx - 25) % 100 == 0):
+            #         #     force_check = False
+            #         print(e)
+            #         print(f"Faulty OCR detection at frame {frame_idx}. Retrying...")
+            #         force_check = True
                     
             # Periodically save detections to disk and free memory
             if frame_idx % chunk_size == 0 and frame_idx > 0:

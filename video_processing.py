@@ -41,7 +41,6 @@ def process_video(video_path):
     score_points = (910, 957, 100, 41)
     print('Select Scoreboard')
     scoreboard_keypoints = get_user_selected_roi(first_frame)
-    return
     print('Scoreboard ROI: ', scoreboard_keypoints)
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')

@@ -36,7 +36,7 @@ def process_video(video_path):
     court_keypoints = get_user_selected_points(first_frame)
     # court_keypoints = [722, 462, 1297, 462, 385, 777, 1650, 797]
     print("Court Keypoints: ", court_keypoints)
-    return
+    
 
     score_points = (910, 957, 100, 41)
     print('Select Scoreboard')

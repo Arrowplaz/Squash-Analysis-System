@@ -249,6 +249,7 @@ def process_videos_in_folder(folder_path):
             video_path = os.path.join(folder_path, filename)
             print(f"Processing video: {video_path}")
             process_video(video_path)
+            return
             
 
 if __name__ == '__main__':

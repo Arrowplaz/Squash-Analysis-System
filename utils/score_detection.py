@@ -28,6 +28,8 @@ def detect_score(frame):
 
     # Convert to grayscale
     gray = cv2.cvtColor(score_roi, cv2.COLOR_BGR2GRAY)
+    cv2.show(gray)
+    cv2.wait(0)
 
     # Use EasyOCR to detect text
     result = reader.readtext(gray, detail=1)  # We need details for bounding boxes

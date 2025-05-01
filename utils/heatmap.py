@@ -140,7 +140,7 @@ def overlay_heatmap(composite, mapped_detections):
         cv2.circle(heatmap, (x, y), radius=5, color=255, thickness=-1)  # Larger radius for spread
 
     # Apply Gaussian blur for a smoother heatmap
-    heatmap = cv2.GaussianBlur(heatmap, (101, 101), 50) #Potentially make the kernal larger
+    # heatmap = cv2.GaussianBlur(heatmap, (101, 101), 50) #Potentially make the kernal larger
 
     # Normalize heatmap to range 0-255
     heatmap = cv2.normalize(heatmap, None, 0, 255, cv2.NORM_MINMAX)
@@ -154,8 +154,8 @@ def overlay_heatmap(composite, mapped_detections):
 
     # # Display the final result
     # cv2.setWindowProperty("Court with Heatmap", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    # cv2.imshow("Court with Heatmap", heatmap_overlay)
-    # cv2.waitKey(0)
+    cv2.imshow("Court with Heatmap", heatmap_overlay)
+    cv2.waitKey(0)
 
     return heatmap
 

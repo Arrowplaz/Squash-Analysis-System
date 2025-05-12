@@ -9,11 +9,11 @@ from utils import (
     overlay_heatmap, save_video, parse_file_name, insert_match,
     filename_parser, get_user_selected_roi, detect_score, compute_distance_traveled
 )
-from trackers import PlayerTracker
+from trackers import PlayerTracker, BallTracker
 import numpy as np
 
 def process_video(video_path):
-    os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
+    #os.environ['TESSDATA_PREFIX'] = '/home/anagireddygari/tessdata'
     print('Opening Video')
     base_name = os.path.basename(video_path)
     file_name, _ = os.path.splitext(base_name)
@@ -40,10 +40,11 @@ def process_video(video_path):
 
     score_points = (910, 957, 100, 41)
     print('Select Scoreboard')
-    scoreboard_keypoints = get_user_selected_roi(first_frame)
+    scoreboard_keypoints = get_user_selected_roi(first_frame, meta=score_points)
     print('Scoreboard ROI: ', scoreboard_keypoints)
     print('Creating Trackers')
     player_tracker = PlayerTracker('./models/yolov8x.pt')
+    ball_tracker = BallTracker('./models/bell_best.pt')
 
     # Set up video writer
     save_path = f"./output_videos/{file_name}"
@@ -54,13 +55,14 @@ def process_video(video_path):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
-
+    # out = cv2.VideoWriter(final_video_path, fourcc, fps, (width, height))
+    
     os.makedirs(detections_path, exist_ok=True)
 
     force_check = False
 
     player_detections = []
+    ball_detections = []
     score_detections = []  # List to store score detections
     prev_p1_score = 0
     prev_p2_score = 0
@@ -80,11 +82,15 @@ def process_video(video_path):
 
             # Process and track players
             detections = player_tracker.detect_frame(frame)
+            ball_stuff = ball_tracker.detect_frame(frame)
             player_detections.append(detections)
+            ball_detections.append(ball_stuff)
             filtered_detections = player_tracker.choose_and_filter_players(player_detections, court_keypoints)
             player_detections = filtered_detections
+            
             output_frame = player_tracker.draw_bbox(frame, player_detections[-1])
-            out.write(output_frame)  # Write frame directly to video
+            output_frame = ball_tracker.draw_bbox(frame, ball_detections[-1])
+            # out.write(output_frame)  # Write frame directly to video
 
             #Detect scoreboard
             # if frame_idx % 100 == 0 or force_check:
@@ -159,14 +165,12 @@ def process_video(video_path):
         score_detections.clear()
         player_detections.clear()
     
-    else:
-        return
 
     
 
 
     cap.release()
-    out.release()
+    # out.release()
     print(f"Final video saved to: {final_video_path}")
 
     # Load all detections for heatmap
@@ -253,8 +257,8 @@ def process_videos_in_folder(folder_path):
 
 if __name__ == '__main__':
     input_folder = "./input_videos"
-    # process_video("./input_videos/Marwan_Elshorbagy_V_Gregoire_Marche_#US_Game2_Pro_M.mp4")
-    process_videos_in_folder(input_folder)
+    process_video("./input_videos/Arav_Bhagwati_V_Nicholas_Spizzirri_#US_Game3_College_M.mp4")
+    # process_videos_in_folder(input_folder)
     
 
 

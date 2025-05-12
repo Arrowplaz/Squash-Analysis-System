@@ -55,19 +55,17 @@ class BallTracker:
         ball_dict = {}
         for box in detections.xyxy:
             result = box.tolist()
-            print(result)
             ball_dict[1] = result
+        
+        return ball_dict
 
         
 
 
-    def draw_bboxes(self, video_frames, ball_detections):
-        output_video_frames = []
-        for frame, ball_dict in zip(video_frames, ball_detections):
-            #Draw the bounding boxes
-            for track_id, bbox in ball_dict.items():
-                x1, y1, x2, y2 = bbox
-                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 255), 2)
-            output_video_frames.append(frame)
+    def draw_bbox(self, video_frame, ball_detection):
+   
+        for track_id, bbox in ball_detection.items():
+            x1, y1, x2, y2 = bbox
+            cv2.rectangle(video_frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 255), 2)
 
-        return output_video_frames
+        return video_frame
